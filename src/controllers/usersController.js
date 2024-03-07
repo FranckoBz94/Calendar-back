@@ -39,6 +39,7 @@ const addUser = async (req, res) => {
         urlImage,
       ]
     )
+    console.log(result)
     if (result.affectedRows > 0) {
       saveImage(req.file)
       res.json({ rta: 1, message: "Usuario agregado exitosamente." })

@@ -1,5 +1,5 @@
 import { getConnection } from "../database/database"
-
+const fs = require("node:fs")
 const table = "barberos"
 
 const getBarbers = async (req, res) => {
@@ -18,7 +18,7 @@ const addBarber = async (req, res) => {
     const barber = req.body
     const fechaCreacion = new Date()
     const connection = await getConnection()
-    console.log(req)
+    const urlImage = "uploads/imageBarbers/" + req.file.originalname
     const result = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, email, telefono, imagen, is_active, is_admin, fecha_creacion)
@@ -29,19 +29,21 @@ const addBarber = async (req, res) => {
         barber.lastName,
         barber.email,
         barber.telefono,
-        barber.imagen,
+        urlImage,
         barber.is_active,
         barber.is_admin,
         fechaCreacion,
       ]
     )
+    console.log(result)
     if (result.affectedRows > 0) {
+      saveImage(req.file)
       res.json({ rta: 1, message: "Barbero agregado exitosamente." })
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." })
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error." })
+    res.json({ rta: -1, message: "Ocurrio un error." + err })
     res.send(err.message)
   }
 }
@@ -49,12 +51,12 @@ const addBarber = async (req, res) => {
 const updateBarber = async (req, res) => {
   try {
     const { id } = req.params
+    const imagen = "uploads/imageBarbers/" + req.file.originalname
     const {
       firstName,
       lastName,
       email,
       telefono,
-      imagen,
       is_active,
       is_admin,
     } = req.body
@@ -69,7 +71,7 @@ const updateBarber = async (req, res) => {
         message: "Ocurrio un problema, por favor complete todos los campos",
       })
     }
-    const user = {
+    const barber = {
       firstName,
       lastName,
       email,
@@ -81,10 +83,11 @@ const updateBarber = async (req, res) => {
     const connection = await getConnection()
     const result = await connection.query(
       `UPDATE ${table}  SET ? where id= ?`,
-      [user, id]
+      [barber, id]
     )
     console.log("result", result.affectedRows)
     if (result.affectedRows > 0) {
+      saveImage(req.file)
       res.json({ rta: 1, message: "Barbero actualizado correctamente." })
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." })
@@ -119,6 +122,13 @@ const deleteBarber = async (req, res) => {
     res.send(err.message)
   }
 }
+
+function saveImage(file) {
+  const newPath = `./uploads/imageBarbers/${file.originalname}`
+  fs.renameSync(file.path, newPath)
+  return newPath
+}
+
 
 export const barbersController = {
   getBarbers,

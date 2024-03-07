@@ -14,6 +14,7 @@ const cors = require("cors")
 const app = express()
 //Settings
 app.use("/uploads", express.static("uploads"))
+app.use("/uploads/imageBarbers", express.static("uploads/imageBarbers"))
 
 app.use(cors())
 app.set("port", 4000)
