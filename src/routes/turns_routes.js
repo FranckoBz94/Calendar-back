@@ -7,5 +7,6 @@ router.post("/", turnsController.addTurn)
 router.put("/:id", turnsController.updateTurn)
 router.delete("/:id", turnsController.deleteTurn)
 router.post("/availableTurn", turnsController.availableNextTurn)
+router.post("/availableDate", turnsController.availableDate)
 
 export default router

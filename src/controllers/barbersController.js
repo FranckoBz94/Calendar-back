@@ -18,7 +18,7 @@ const addBarber = async (req, res) => {
     const barber = req.body
     const fechaCreacion = new Date()
     const connection = await getConnection()
-    const urlImage = "uploads/imageBarbers/" + req.file.originalname
+    const urlImage = req.file ? "uploads/imageBarbers/" + req.file.originalname : req.body.imageProfile
     const result = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, email, telefono, imagen, is_active, is_admin, fecha_creacion)
@@ -37,7 +37,9 @@ const addBarber = async (req, res) => {
     )
     console.log(result)
     if (result.affectedRows > 0) {
-      saveImage(req.file)
+      if (req.file) {
+        saveImage(req.file)
+      }
       res.json({ rta: 1, message: "Barbero agregado exitosamente." })
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." })
@@ -51,7 +53,12 @@ const addBarber = async (req, res) => {
 const updateBarber = async (req, res) => {
   try {
     const { id } = req.params
-    const imagen = "uploads/imageBarbers/" + req.file.originalname
+    let imagen = ""
+    if (req.file) {
+      imagen = "uploads/imageBarbers/" + req.file.originalname
+    } else {
+      imagen = req.body.imageProfile;
+    }
     const {
       firstName,
       lastName,
@@ -60,40 +67,32 @@ const updateBarber = async (req, res) => {
       is_active,
       is_admin,
     } = req.body
-    if (
-      id === undefined ||
-      firstName === undefined ||
-      lastName === undefined ||
-      email === undefined
-    ) {
-      res.json({
-        rta: -1,
-        message: "Ocurrio un problema, por favor complete todos los campos",
-      })
-    }
+    const isActiveInt = is_active === 'true' ? 1 : 0;
+    const isAdminInt = is_admin === 'true' ? 1 : 0;
     const barber = {
       firstName,
       lastName,
       email,
       telefono,
-      imagen,
-      is_active,
-      is_admin,
+      ...(req.file && { imagen }),
+      is_active: isActiveInt,
+      is_admin: isAdminInt,
     }
+    console.log("barber", barber)
     const connection = await getConnection()
     const result = await connection.query(
       `UPDATE ${table}  SET ? where id= ?`,
       [barber, id]
     )
-    console.log("result", result.affectedRows)
     if (result.affectedRows > 0) {
-      saveImage(req.file)
-      res.json({ rta: 1, message: "Barbero actualizado correctamente." })
+      if (req.file) {
+        saveImage(req.file);
+      } res.json({ rta: 1, message: "Barbero actualizado correctamente." })
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." })
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error." })
+    res.json({ rta: -1, message: "Ocurrio un error. catch" + err })
     res.send(err.message)
   }
 }

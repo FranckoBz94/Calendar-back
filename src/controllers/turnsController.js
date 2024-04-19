@@ -7,11 +7,16 @@ const getTurns = async (req, res) => {
   try {
     const { id: idBarber } = req.params
     const connection = await getConnection()
+    console.log("select t.*, c.firstName AS nameClient,c.lastName AS lastNameClient,s.event_color AS colorEvent, s.minutes_service as minutes from " +
+      table +
+      " t JOIN clientes c ON t.cliente_id = c.id LEFT JOIN servicios s ON t.service_id = s.id where t.barber_id = " +
+      idBarber.toString()
+    )
     const result = await connection.query(
-      "select t.*, c.firstName AS nameClient,c.lastName AS lastNameClient,s.event_color AS colorEvent, s.minutes_service as minutes from " +
-        table +
-        " t JOIN clientes c ON t.cliente_id = c.id LEFT JOIN servicios s ON t.service_id = s.id where t.barber_id = " +
-        idBarber.toString()
+      "select t.*, c.firstName AS nameClient,c.lastName AS lastNameClient,s.event_color AS colorEvent, s.name_service as nameService, s.minutes_service as minutes from " +
+      table +
+      " t JOIN clientes c ON t.cliente_id = c.id LEFT JOIN servicios s ON t.service_id = s.id where t.barber_id = " +
+      idBarber.toString()
     )
     console.log(result)
     res.json(result)
@@ -141,10 +146,25 @@ const availableNextTurn = async (req, res) => {
   }
 }
 
+const availableDate = async (req, res) => {
+  try {
+    const { start_date, end_date, idBarber } = req.body
+    const connection = await getConnection()
+    const result = await connection.query(
+      `SELECT COUNT(*) AS count_turns FROM turnos WHERE start_date>="${start_date}" AND end_date <="${end_date}" and barber_id=${idBarber}`
+    )
+    res.json({ rta: 1, message: result })
+  } catch (err) {
+    res.status(500)
+    res.json({ rta: -1, message: "Ocurrio un error." })
+  }
+}
+
 export const turnsController = {
   getTurns,
   addTurn,
   updateTurn,
   deleteTurn,
   availableNextTurn,
+  availableDate,
 }
