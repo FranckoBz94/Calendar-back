@@ -24,7 +24,7 @@ const addUser = async (req, res) => {
     const urlImage = "uploads/" + req.file.originalname
     const result = await connection.query(
       `INSERT INTO ${table}
-    (firstName, lastName, email, password, is_active, is_admin, fecha_creacion, id_barbero, url_image)
+    (firstName, lastName, email, password, is_barber, is_admin, fecha_creacion, id_barbero, url_image)
     VALUES
     (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -32,7 +32,7 @@ const addUser = async (req, res) => {
         user.lastName,
         user.email,
         hashedPassword,
-        user.is_active,
+        user.is_barber,
         user.is_admin,
         fechaCreacion,
         1,

@@ -18,7 +18,7 @@ const addBarber = async (req, res) => {
     const barber = req.body
     const fechaCreacion = new Date()
     const connection = await getConnection()
-    const urlImage = req.file ? "uploads/imageBarbers/" + req.file.originalname : req.body.imageProfile
+    const urlImage = "uploads/imageBarbers/" + req.file.originalname
     const result = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, email, telefono, imagen, is_active, is_admin, fecha_creacion)

@@ -8,5 +8,6 @@ router.put("/:id", turnsController.updateTurn)
 router.delete("/:id", turnsController.deleteTurn)
 router.post("/availableTurn", turnsController.availableNextTurn)
 router.post("/availableDate", turnsController.availableDate)
+router.post("/searchTurnsProfits", turnsController.searchTurnsProfits)
 
 export default router

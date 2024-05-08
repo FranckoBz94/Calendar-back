@@ -34,9 +34,9 @@ const addTurn = async (req, res) => {
     const connection = await getConnection()
     const result = await connection.query(
       `INSERT INTO ${table}
-    (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id)
+    (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id,price_service)
     VALUES
-    (?, ?, ?, ?, ?, ?, ?)`,
+    (?, ?, ?, ?, ?, ?, ?,?)`,
       [
         turn.dateBooking,
         fechaCreacion,
@@ -45,6 +45,7 @@ const addTurn = async (req, res) => {
         turn.idClient,
         turn.idBarber,
         turn.idService,
+        turn.price
       ]
     )
     if (result.affectedRows > 0) {
@@ -160,6 +161,22 @@ const availableDate = async (req, res) => {
   }
 }
 
+const searchTurnsProfits = async (req, res) => {
+  try {
+    const { start_date, end_date, idBarber } = req.body
+    const connection = await getConnection()
+    const result = await connection.query(
+      `SELECT T.fecha_reserva,T.start_date,T.end_date,T.price_service,C.firstName,C.lastName,B.firstName as nameBarber,B.lastName as lastNameBarber,S.name_service FROM turnos T INNER JOIN clientes C ON T.cliente_id = C.id INNER JOIN barberos B ON T.barber_id=B.id INNER JOIN servicios S ON T.service_id=S.id WHERE T.barber_id="${idBarber}" and T.fecha_reserva>="${start_date}" and T.fecha_reserva<="${end_date}"`
+    )
+    res.json({ rta: 1, dataProfit: result })
+  } catch (err) {
+    res.status(500)
+    res.json({ rta: -1, message: "Ocurrio un error." + err })
+  }
+}
+
+
+
 export const turnsController = {
   getTurns,
   addTurn,
@@ -167,4 +184,5 @@ export const turnsController = {
   deleteTurn,
   availableNextTurn,
   availableDate,
+  searchTurnsProfits,
 }
