@@ -18,7 +18,9 @@ const addBarber = async (req, res) => {
     const barber = req.body
     const fechaCreacion = new Date()
     const connection = await getConnection()
-    const urlImage = "uploads/imageBarbers/" + req.file.originalname
+    const urlImage =req.file ? "uploads/imageBarbers/" + req.file.originalname :"uploads/imageBarbers/profile.png"
+    const isActiveInt = barber.is_active === 'true' ? 1 : 0;
+    const isAdminInt = barber.is_admin === 'true' ? 1 : 0;
     const result = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, email, telefono, imagen, is_active, is_admin, fecha_creacion)
@@ -30,17 +32,18 @@ const addBarber = async (req, res) => {
         barber.email,
         barber.telefono,
         urlImage,
-        barber.is_active,
-        barber.is_admin,
+        isActiveInt,
+        isAdminInt,
         fechaCreacion,
       ]
     )
     console.log(result)
     if (result.affectedRows > 0) {
+      const insertedId = result.insertId; // Obtener el ID insertado
       if (req.file) {
         saveImage(req.file)
       }
-      res.json({ rta: 1, message: "Barbero agregado exitosamente." })
+      res.json({ rta: 1, message: "Barbero agregado exitosamente.", barberId: insertedId  })
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." })
     }
@@ -87,7 +90,8 @@ const updateBarber = async (req, res) => {
     if (result.affectedRows > 0) {
       if (req.file) {
         saveImage(req.file);
-      } res.json({ rta: 1, message: "Barbero actualizado correctamente." })
+      } 
+      res.json({ rta: 1, message: "Barbero actualizado correctamente." })
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." })
     }

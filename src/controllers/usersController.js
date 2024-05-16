@@ -3,11 +3,24 @@ import { getConnection } from "../database/database"
 const bcrypt = require("bcrypt")
 const fs = require("node:fs")
 const table = "usuarios_sistema"
+const jwt = require("jsonwebtoken")
 
 const getUsers = async (req, res) => {
   try {
     const connection = await getConnection()
     const result = await connection.query("select * from " + table)
+    res.json(result)
+  } catch (err) {
+    res.status(500)
+    res.send(err.message)
+  }
+}
+
+const getUserLogged = async (req, res) => {
+  try {
+    const { id } = req.params
+    const connection = await getConnection()
+    const result = await connection.query("select * from " + table + " where id=" + id)
     res.json(result)
   } catch (err) {
     res.status(500)
@@ -21,7 +34,9 @@ const addUser = async (req, res) => {
     const fechaCreacion = new Date()
     const connection = await getConnection()
     const hashedPassword = await bcrypt.hash("1234", 10) // Hash de la contraseña
-    const urlImage = "uploads/" + req.file.originalname
+    const urlImage = req.file ? "uploads/" + req.file.originalname : "uploads/profile.png"
+    const isBarberInt = user.is_barber === 'true' ? 1 : 0;
+    const isAdminInt = user.is_admin === 'true' ? 1 : 0;
     const result = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, email, password, is_barber, is_admin, fecha_creacion, id_barbero, url_image)
@@ -32,16 +47,18 @@ const addUser = async (req, res) => {
         user.lastName,
         user.email,
         hashedPassword,
-        user.is_barber,
-        user.is_admin,
+        isBarberInt,
+        isAdminInt,
         fechaCreacion,
-        1,
+        user.id_barbero,
         urlImage,
       ]
     )
     console.log(result)
     if (result.affectedRows > 0) {
-      saveImage(req.file)
+      if (req.file) {
+        saveImage(req.file)
+      }
       res.json({ rta: 1, message: "Usuario agregado exitosamente." })
     } else {
       res.json({ rta: -1, message: "Ocurrio un errorr." })
@@ -54,10 +71,15 @@ const addUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params
-    const url_image = "uploads/" + req.file.originalname
-    console.log("url", url_image)
-
-    const { firstName, lastName, email, is_active, is_admin } = req.body
+    let url_image = ""
+    if (req.file) {
+      url_image = "uploads/imageBarbers/" + req.file.originalname
+    } else {
+      url_image = req.body.imageProfile;
+    }
+    const { firstName, lastName, email, is_barber, is_admin } = req.body
+    const isBarberInt = is_barber === 'true' ? 1 : 0;
+    const isAdminInt = is_admin === 'true' ? 1 : 0;
     if (
       id === undefined ||
       firstName === undefined ||
@@ -73,9 +95,9 @@ const updateUser = async (req, res) => {
       firstName,
       lastName,
       email,
-      is_active,
-      is_admin,
-      url_image,
+      is_barber: isBarberInt,
+      is_admin: isAdminInt,
+      ...(req.file && { url_image }),
     }
     const connection = await getConnection()
     const result = await connection.query(
@@ -84,13 +106,15 @@ const updateUser = async (req, res) => {
     )
     console.log("result", result)
     if (result.affectedRows > 0) {
-      saveImage(req.file)
+      if (req.file) {
+        saveImage(req.file);
+      }
       res.json({ rta: 1, message: "Se actualizo correctamente." })
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." })
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error, catch." })
+    res.json({ rta: -1, message: "Ocurrio un error, catch." + err })
     res.send(err.message)
   }
 }
@@ -127,9 +151,36 @@ function saveImage(file) {
   return newPath
 }
 
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body
+    const connection = await getConnection()
+    const result = await connection.query(`select * from ${table} where email='${email}'`)
+    if (result.length > 0) {
+      const hashedPasswordFromDB = result[0].password;
+      const isPasswordCorrect = await bcrypt.compare(password, hashedPasswordFromDB);
+      if (isPasswordCorrect) {
+        const { firstName } = result[0]
+        const token = jwt.sign({ firstName }, "Stack", {
+          expiresIn: "1d"
+        })
+        res.json({ rta: 1, message: result[0], token })
+      } else {
+        res.json({ rta: -1, message: "Usuario y/o contraseña incorrecta." });
+      }
+    } else {
+      res.json({ rta: -1, message: "Usuario y/o contraseña incorrecta." })
+    }
+  } catch (err) {
+    res.json({ rta: -1, message: "Ocurrio un error." + err })
+  }
+}
+
 export const usersController = {
   getUsers,
   addUser,
   updateUser,
   deleteUser,
+  login,
+  getUserLogged,
 }
