@@ -7,18 +7,12 @@ const getTurns = async (req, res) => {
   try {
     const { id: idBarber } = req.params
     const connection = await getConnection()
-    console.log("select t.*, c.firstName AS nameClient,c.lastName AS lastNameClient,s.event_color AS colorEvent, s.minutes_service as minutes from " +
-      table +
-      " t JOIN clientes c ON t.cliente_id = c.id LEFT JOIN servicios s ON t.service_id = s.id where t.barber_id = " +
-      idBarber.toString()
-    )
     const result = await connection.query(
       "select t.*, c.firstName AS nameClient,c.lastName AS lastNameClient,s.event_color AS colorEvent, s.name_service as nameService, s.minutes_service as minutes from " +
       table +
       " t JOIN clientes c ON t.cliente_id = c.id LEFT JOIN servicios s ON t.service_id = s.id where t.barber_id = " +
       idBarber.toString()
     )
-    console.log(result)
     res.json(result)
   } catch (err) {
     res.status(500)
@@ -29,7 +23,6 @@ const getTurns = async (req, res) => {
 const addTurn = async (req, res) => {
   try {
     const turn = req.body
-    console.log("turn", turn)
     const fechaCreacion = new Date()
     const connection = await getConnection()
     const result = await connection.query(
@@ -84,14 +77,11 @@ const updateTurn = async (req, res) => {
       service_id: idService,
       barber_id: idBarber,
     }
-    console.log("turn", turn)
-
     const connection = await getConnection()
     const result = await connection.query(
       `UPDATE ${table}  SET ? where id= ?`,
       [turn, id]
     )
-    console.log("result", result.affectedRows)
     if (result.affectedRows > 0) {
       res.json({ rta: 1, message: "Se actualizo correctamente." })
     } else {
@@ -105,7 +95,6 @@ const updateTurn = async (req, res) => {
 
 const deleteTurn = async (req, res) => {
   try {
-    console.log("req", req.params)
     const { id } = req.params
     const connection = await getConnection()
     const result = await connection.query(
@@ -136,9 +125,19 @@ const availableNextTurn = async (req, res) => {
     const result = await connection.query(
       `SELECT * from ${table} WHERE start_date>"${start_date}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
     )
-    console.log(
-      "available",
-      `SELECT * from ${table} WHERE start_date>"${start_date}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
+    res.json({ rta: 1, message: result })
+  } catch (err) {
+    res.status(500)
+    res.json({ rta: -1, message: "Ocurrio un error." })
+  }
+}
+
+const availableHoursOnSave = async (req, res) => {
+  try {
+    const {  start_date, end_date, idBarber } = req.body
+    const connection = await getConnection()
+    const result = await connection.query(
+      `SELECT * from ${table} WHERE (start_date<"${end_date}" and end_date>"${start_date}") and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
     )
     res.json({ rta: 1, message: result })
   } catch (err) {
@@ -166,7 +165,7 @@ const searchTurnsProfits = async (req, res) => {
     const { start_date, end_date, idBarber } = req.body
     const connection = await getConnection()
     const result = await connection.query(
-      `SELECT T.fecha_reserva,T.start_date,T.end_date,T.price_service,C.firstName,C.lastName,B.firstName as nameBarber,B.lastName as lastNameBarber,S.name_service FROM turnos T INNER JOIN clientes C ON T.cliente_id = C.id INNER JOIN barberos B ON T.barber_id=B.id INNER JOIN servicios S ON T.service_id=S.id WHERE T.barber_id="${idBarber}" and T.fecha_reserva>="${start_date}" and T.fecha_reserva<="${end_date}"`
+      `SELECT T.fecha_reserva,T.start_date,T.end_date,T.price_service,C.firstName,C.lastName,B.firstName as nameBarber,B.lastName as lastNameBarber,S.name_service FROM turnos T INNER JOIN clientes C ON T.cliente_id = C.id INNER JOIN barberos B ON T.barber_id=B.id INNER JOIN servicios S ON T.service_id=S.id WHERE T.barber_id="${idBarber}" and T.start_date>="${start_date}" and T.end_date<="${end_date}"`
     )
     res.json({ rta: 1, dataProfit: result })
   } catch (err) {
@@ -185,4 +184,5 @@ export const turnsController = {
   availableNextTurn,
   availableDate,
   searchTurnsProfits,
+  availableHoursOnSave,
 }

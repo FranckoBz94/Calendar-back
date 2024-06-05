@@ -156,8 +156,11 @@ const login = async (req, res) => {
     const { email, password } = req.body
     const connection = await getConnection()
     const result = await connection.query(`select * from ${table} where email='${email}'`)
+    console.log("result", `select * from ${table} where email='${email}'`)
     if (result.length > 0) {
       const hashedPasswordFromDB = result[0].password;
+      console.log("hashedPasswordFromDB", hashedPasswordFromDB)
+      console.log("password", password)
       const isPasswordCorrect = await bcrypt.compare(password, hashedPasswordFromDB);
       if (isPasswordCorrect) {
         const { firstName } = result[0]
@@ -169,7 +172,7 @@ const login = async (req, res) => {
         res.json({ rta: -1, message: "Usuario y/o contraseña incorrecta." });
       }
     } else {
-      res.json({ rta: -1, message: "Usuario y/o contraseña incorrecta." })
+      res.json({ rta: -1, message: "Usuario y/o contraseña incorrectaa." })
     }
   } catch (err) {
     res.json({ rta: -1, message: "Ocurrio un error." + err })

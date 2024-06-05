@@ -7,11 +7,11 @@ import services from "./routes/services_routes"
 import barbers from "./routes/barbers_routes"
 import turns from "./routes/turns_routes"
 import hours from "./routes/hours_routes"
-import moment from "moment/moment"
 
 const express = require("express")
 const cors = require("cors")
 const app = express()
+
 //Settings
 app.use("/uploads", express.static("uploads"))
 app.use("/uploads/imageBarbers", express.static("uploads/imageBarbers"))
