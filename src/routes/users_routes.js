@@ -12,6 +12,7 @@ router.get("/", usersController.getUsers)
 router.get("/myprofile/:id", usersController.getUserLogged)
 router.post("/", upload.single("imageProfile"), usersController.addUser)
 router.put("/:id", upload.single("imageProfile"), usersController.updateUser)
+router.put("/updateStateBarber/:id", usersController.updateStateUser)
 router.delete("/:id", usersController.deleteUser)
 
 export default router

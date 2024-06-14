@@ -5,7 +5,7 @@ const table = "barberos"
 const getBarbers = async (req, res) => {
   try {
     const connection = await getConnection()
-    const result = await connection.query("select * from " + table)
+    const result = await connection.query("SELECT b.*,u.firstName as nameBarber, u.lastName as lastNameBarber, u.email as emailUser FROM "+table+" as b LEFT JOIN usuarios_sistema as u ON b.id_user = u.id")                        
     res.json(result)
   } catch (err) {
     res.status(500)
@@ -69,6 +69,7 @@ const updateBarber = async (req, res) => {
       telefono,
       is_active,
       is_admin,
+      id_user,
     } = req.body
     const isActiveInt = is_active === 'true' ? 1 : 0;
     const isAdminInt = is_admin === 'true' ? 1 : 0;
@@ -80,6 +81,7 @@ const updateBarber = async (req, res) => {
       ...(req.file && { imagen }),
       is_active: isActiveInt,
       is_admin: isAdminInt,
+      id_user
     }
     console.log("barber", barber)
     const connection = await getConnection()

@@ -37,11 +37,22 @@ const addUser = async (req, res) => {
     const urlImage = req.file ? "uploads/" + req.file.originalname : "uploads/profile.png"
     const isBarberInt = user.is_barber === 'true' ? 1 : 0;
     const isAdminInt = user.is_admin === 'true' ? 1 : 0;
+
+    const [existingUser] = await connection.query(
+      `SELECT * FROM ${table} WHERE email = ?`,
+      [user.email]
+    );
+
+    if (existingUser !== undefined) {
+      res.json({ rta: -2, message: "El correo electrónico ya está registrado." });
+      return;
+    }
+
     const result = await connection.query(
       `INSERT INTO ${table}
-    (firstName, lastName, email, password, is_barber, is_admin, fecha_creacion, id_barbero, url_image)
+    (firstName, lastName, email, password, is_barber, is_admin, fecha_creacion, url_image)
     VALUES
-    (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         user.firstName,
         user.lastName,
@@ -50,7 +61,6 @@ const addUser = async (req, res) => {
         isBarberInt,
         isAdminInt,
         fechaCreacion,
-        user.id_barbero,
         urlImage,
       ]
     )
@@ -66,6 +76,26 @@ const addUser = async (req, res) => {
   } catch (err) {
     res.json({ rta: -1, message: "Ocurrio un error." + err })
   }
+}
+
+const updateStateUser = async (req,res)=>{
+  try{
+    const { isBarber } = req.body
+    const { id } = req.params
+    const connection = await getConnection()
+    const result = await connection.query(
+      `UPDATE ${table} SET is_barber = ? WHERE id = ?`,
+      [isBarber, id]
+    )
+    if (result.affectedRows > 0) {
+      res.json({ rta: 1, message: "Se actualizo correctamente." })
+    } else {
+      res.json({ rta: -1, message: "Ocurrio un error." })
+    }
+  } catch(err){
+    res.json({ rta: -1, message: "Ocurrio un error, catch." + err })
+    res.send(err.message)
+  } 
 }
 
 const updateUser = async (req, res) => {
@@ -186,4 +216,5 @@ export const usersController = {
   deleteUser,
   login,
   getUserLogged,
+  updateStateUser,
 }
