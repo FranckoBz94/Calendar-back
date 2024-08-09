@@ -9,6 +9,11 @@ var upload = multer({ dest: "uploads/" })
 
 router.post("/login", usersController.login)
 router.get("/", usersController.getUsers)
+router.post("/dataGraphics", usersController.getDataGraphicsUser)
+router.post("/countTurnsGraphics", usersController.getDataTurnsGraphics)
+router.post("/getTurnsDayWeek", usersController.getTurnsDayWeek)
+
+
 router.get("/myprofile/:id", usersController.getUserLogged)
 router.post("/", upload.single("imageProfile"), usersController.addUser)
 router.put("/:id", upload.single("imageProfile"), usersController.updateUser)

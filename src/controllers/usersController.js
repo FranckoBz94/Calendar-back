@@ -107,8 +107,7 @@ const updateUser = async (req, res) => {
     } else {
       url_image = req.body.imageProfile;
     }
-    const { firstName, lastName, email, is_barber, is_admin } = req.body
-    const isBarberInt = is_barber === 'true' ? 1 : 0;
+    const { firstName, lastName, email, is_admin } = req.body
     const isAdminInt = is_admin === 'true' ? 1 : 0;
     if (
       id === undefined ||
@@ -125,7 +124,6 @@ const updateUser = async (req, res) => {
       firstName,
       lastName,
       email,
-      is_barber: isBarberInt,
       is_admin: isAdminInt,
       ...(req.file && { url_image }),
     }
@@ -186,11 +184,8 @@ const login = async (req, res) => {
     const { email, password } = req.body
     const connection = await getConnection()
     const result = await connection.query(`select * from ${table} where email='${email}'`)
-    console.log("result", `select * from ${table} where email='${email}'`)
     if (result.length > 0) {
       const hashedPasswordFromDB = result[0].password;
-      console.log("hashedPasswordFromDB", hashedPasswordFromDB)
-      console.log("password", password)
       const isPasswordCorrect = await bcrypt.compare(password, hashedPasswordFromDB);
       if (isPasswordCorrect) {
         const { firstName } = result[0]
@@ -209,6 +204,163 @@ const login = async (req, res) => {
   }
 }
 
+const getDataGraphicsUser = async (req, res) => {
+  try {
+    const { id,formattedStartDate,formattedEndDate } = req.body;
+
+    const barberId = id !== 0 ? id : null;
+
+    const connection = await getConnection();
+    
+    let query = `
+      SELECT 
+        T.service_id, 
+        COUNT(*) AS cantidad_turnos, 
+        S.name_service 
+      FROM 
+        turnos T 
+      INNER JOIN 
+        servicios S 
+      ON 
+        T.service_id = S.id 
+      WHERE 
+        1=1`; // Incluir `1=1` para simplificar la lógica de concatenación
+    
+    // Si id no es 'all', agregar el filtro para barber_id
+    if (barberId !== null) {
+      query += ` AND t.barber_id = ?`;
+    }
+    query += ` AND T.fecha_reserva BETWEEN ? AND ?`;
+
+    query += `
+      GROUP BY 
+        T.service_id, 
+        S.name_service
+    `;
+    
+    const result = await connection.query(query, 
+      barberId !== null 
+        ? [barberId, formattedStartDate, formattedEndDate] 
+        : [formattedStartDate, formattedEndDate]
+    );
+    res.json(result);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};
+
+
+
+const getDataTurnsGraphics = async (req, res) => {
+  try {
+    console.log(req.body);
+    const connection = await getConnection();
+    const { id, formattedStartDate, formattedEndDate } = req.body;
+    console.log("formattedStartDate", formattedStartDate);
+    console.log("formattedEndDate", formattedEndDate);
+    // Construcción de la consulta SQL
+    let query = `
+      SELECT 
+        t.barber_id, 
+        b.firstName AS nameBarber, 
+        b.lastName AS lastNameBarber, 
+        YEAR(t.fecha_reserva) AS year, 
+        MONTH(t.fecha_reserva) AS month, 
+        COUNT(*) AS total_turnos 
+      FROM 
+        turnos t 
+      INNER JOIN 
+        barberos b ON t.barber_id = b.id 
+      WHERE 
+        t.fecha_reserva BETWEEN ? AND ?`;
+
+    const queryParams = [formattedStartDate, formattedEndDate];
+    
+    if (id !== 0) {
+      query += ` AND t.barber_id = ?`;
+      queryParams.push(id);
+    }
+
+    // Continuar construyendo la consulta
+    query += `
+      GROUP BY 
+        t.barber_id, 
+        b.firstName, 
+        b.lastName, 
+        YEAR(t.fecha_reserva), 
+        MONTH(t.fecha_reserva) 
+      ORDER BY 
+        YEAR(t.fecha_reserva), 
+        MONTH(t.fecha_reserva);
+    `;
+
+    const result = await connection.query(query, queryParams);
+    res.json(result);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};
+
+
+const getTurnsDayWeek = async (req, res) => {
+  try {
+    const connection = await getConnection();
+    const { id, formattedStartDate, formattedEndDate } = req.body;
+
+    let query = `
+      WITH dias_semana AS (
+        SELECT 1 AS dia_num, 'Domingo' AS nombre_dia
+        UNION ALL SELECT 2, 'Lunes'
+        UNION ALL SELECT 3, 'Martes'
+        UNION ALL SELECT 4, 'Miércoles'
+        UNION ALL SELECT 5, 'Jueves'
+        UNION ALL SELECT 6, 'Viernes'
+        UNION ALL SELECT 7, 'Sábado'
+      )
+      SELECT 
+        ds.nombre_dia,
+        COALESCE(COUNT(t.fecha_reserva), 0) AS cantidad_cortes
+      FROM 
+        dias_semana ds
+      LEFT JOIN 
+        turnos t 
+      ON 
+        DAYOFWEEK(t.fecha_reserva) = ds.dia_num
+      WHERE
+        t.fecha_reserva BETWEEN ? AND ?`;
+
+    const queryParams = [formattedStartDate, formattedEndDate];
+
+    // Agregar condición para filtrar por barber_id si es necesario
+    if (id !== 0) {
+      query += ` AND t.barber_id = ?`;
+      queryParams.push(id);
+    }
+
+    // Continuar construyendo la consulta
+    query += `
+      GROUP BY 
+        ds.nombre_dia
+      ORDER BY 
+        FIELD(ds.nombre_dia, 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo');
+    `;
+
+    // Ejecutar la consulta con parámetros
+    const result = await connection.query(query, queryParams);
+    console.log("result", result); // Verificar el resultado completo
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};
+
+
+
+
+
+
+
 export const usersController = {
   getUsers,
   addUser,
@@ -217,4 +369,7 @@ export const usersController = {
   login,
   getUserLogged,
   updateStateUser,
+  getDataGraphicsUser,
+  getDataTurnsGraphics,
+  getTurnsDayWeek,
 }

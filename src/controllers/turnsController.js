@@ -162,10 +162,10 @@ const availableDate = async (req, res) => {
 
 const searchTurnsProfits = async (req, res) => {
   try {
-    const { start_date, end_date, idBarber } = req.body
+    const { formattedStartDate, formattedEndDate, idBarber } = req.body
     const connection = await getConnection()
     const result = await connection.query(
-      `SELECT T.fecha_reserva,T.start_date,T.end_date,T.price_service,C.firstName,C.lastName,B.firstName as nameBarber,B.lastName as lastNameBarber,S.name_service FROM turnos T INNER JOIN clientes C ON T.cliente_id = C.id INNER JOIN barberos B ON T.barber_id=B.id INNER JOIN servicios S ON T.service_id=S.id WHERE T.barber_id="${idBarber}" and T.start_date>="${start_date}" and T.end_date<="${end_date}"`
+      `SELECT T.fecha_reserva,T.start_date,T.end_date,T.price_service,C.firstName,C.lastName,B.firstName as nameBarber,B.lastName as lastNameBarber,S.name_service FROM turnos T INNER JOIN clientes C ON T.cliente_id = C.id INNER JOIN barberos B ON T.barber_id=B.id INNER JOIN servicios S ON T.service_id=S.id WHERE T.barber_id="${idBarber}" and T.fecha_reserva>="${formattedStartDate}" and T.fecha_reserva<="${formattedEndDate}"`
     )
     res.json({ rta: 1, dataProfit: result })
   } catch (err) {
