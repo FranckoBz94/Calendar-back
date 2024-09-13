@@ -8,7 +8,11 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://192.168.0.6:3000"],
+    origin: [
+      "http://localhost:3000",
+      "http://192.168.0.6:3000",
+      "https://calendar-rust-three.vercel.app",
+    ],
     methods: ["GET", "POST"],
   },
   connectionStateRecovery: {},
@@ -16,9 +20,9 @@ const io = new Server(server, {
 
 const port = app.get("port");
 
-app.get("/", (req, res) => {
-  res.sendFile(process.cwd() + "/front/src/index.tsx");
-});
+// app.get("/", (req, res) => {
+//   res.sendFile(process.cwd() + "/front/src/index.tsx");
+// });
 
 io.on("connection", (socket) => {
   console.log("a user has connected");
