@@ -17,15 +17,39 @@ const addClient = async (req, res) => {
   try {
     const client = req.body;
     const connection = await getConnection();
-
+    console.log("client", client);
     const [rows] = await connection.query(
       `SELECT * FROM ${table} WHERE dni = ?`,
       [client.dni]
     );
     if (rows !== undefined) {
       return res.json({
-        rta: -1,
+        rta: -2,
         message: "Ya existe un cliente con este DNI.",
+      });
+    }
+
+    const [rowsByEmail] = await connection.query(
+      `SELECT * FROM ${table} WHERE email = ?`,
+      [client.email]
+    );
+    console.log("rowsByEmail", rowsByEmail);
+    if (rowsByEmail !== undefined) {
+      return res.json({
+        rta: -2,
+        message: "Ya existe un cliente con este email.",
+      });
+    }
+
+    const [rowsByTelefono] = await connection.query(
+      `SELECT * FROM ${table} WHERE telefono = ?`,
+      [client.telefono]
+    );
+    console.log("rowsByTelefono", rowsByTelefono);
+    if (rowsByTelefono !== undefined) {
+      return res.json({
+        rta: -2,
+        message: "Ya existe un cliente con ese telefono.",
       });
     }
 
