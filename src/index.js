@@ -8,11 +8,7 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://192.168.0.6:3000",
-      "http://soft-salamander-3ca822.netlify.app",
-    ],
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"], // Los métodos permitidos
     credentials: true,
   },
