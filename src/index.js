@@ -11,7 +11,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:3000",
       "http://192.168.0.6:3000",
-      "http://66f18eb682dad50008f6a6ef--soft-salamander-3ca822.netlify.app",
+      "http://soft-salamander-3ca822.netlify.app/",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"], // Los métodos permitidos
     credentials: true,
