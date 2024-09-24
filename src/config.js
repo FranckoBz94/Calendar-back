@@ -1,5 +1,11 @@
 import { config } from "dotenv";
+// Determina el archivo .env a cargar
+const envFile =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+config({ path: envFile }); // Carga el archivo correspondiente
 
+// Opcional: verificar que se cargaron las variables
+console.log("Loaded environment variables from:", envFile);
 config();
 
 export default {

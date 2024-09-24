@@ -8,7 +8,6 @@ import barbers from "./routes/barbers_routes";
 import turns from "./routes/turns_routes";
 import hours from "./routes/hours_routes";
 import { config } from "dotenv";
-
 config();
 
 const express = require("express");
