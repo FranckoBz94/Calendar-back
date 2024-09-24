@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "babel-node": "babel-node --presets=@babel/preset-env",
+    "babel-node": "npm install --omit=dev && babel-node --presets=@babel/preset-env",
     "dev": "nodemon --exec npm run babel-node src/index.js",
     "start": "npm install --omit=dev && nodemon --exec npm run babel-node src/index.js"
   },
