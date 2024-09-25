@@ -1,6 +1,8 @@
-import mysql from "promise-mysql";
+// import mysql from "promise-mysql";
 import config from "../config";
 console.log("config,", config);
+import mysql from "mysql2";
+
 const connection = mysql.createConnection({
   host: config.host,
   database: config.database,
