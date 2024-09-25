@@ -14,9 +14,7 @@ const io = new Server(server, {
   },
   connectionStateRecovery: {},
 });
-console.log("app", app);
 const port = app.get("port");
-console.log("port", port);
 // app.get("/", (req, res) => {
 //   res.sendFile(process.cwd() + "/front/src/index.tsx");
 // });
