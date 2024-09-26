@@ -6,7 +6,7 @@ config({ path: envFile }); // Carga el archivo correspondiente
 
 // Opcional: verificar que se cargaron las variables
 console.log("Loaded environment variables from:", envFile);
-config();
+// config();
 
 export default {
   host: process.env.HOST || "",
