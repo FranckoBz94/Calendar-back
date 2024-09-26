@@ -1,42 +1,46 @@
-import { getConnection } from "../database/database"
+import { getConnection } from "../database/database";
 
-const bcrypt = require("bcrypt")
-const fs = require("node:fs")
-const table = "usuarios_sistema"
-const jwt = require("jsonwebtoken")
+const bcrypt = require("bcrypt");
+const fs = require("node:fs");
+const table = "usuarios_sistema";
+const jwt = require("jsonwebtoken");
 
 const getUsers = async (req, res) => {
   try {
-    const connection = await getConnection()
-    const result = await connection.query("select * from " + table)
-    res.json(result)
+    const connection = await getConnection();
+    const [result] = await connection.query("select * from " + table);
+    res.json(result);
   } catch (err) {
-    res.status(500)
-    res.send(err.message)
+    res.status(500);
+    res.send(err.message);
   }
-}
+};
 
 const getUserLogged = async (req, res) => {
   try {
-    const { id } = req.params
-    const connection = await getConnection()
-    const result = await connection.query("select * from " + table + " where id=" + id)
-    res.json(result)
+    const { id } = req.params;
+    const connection = await getConnection();
+    const [result] = await connection.query(
+      "select * from " + table + " where id=" + id
+    );
+    res.json(result);
   } catch (err) {
-    res.status(500)
-    res.send(err.message)
+    res.status(500);
+    res.send(err.message);
   }
-}
+};
 
 const addUser = async (req, res) => {
   try {
-    const user = req.body
-    const fechaCreacion = new Date()
-    const connection = await getConnection()
-    const hashedPassword = await bcrypt.hash("1234", 10) // Hash de la contraseña
-    const urlImage = req.file ? "uploads/" + req.file.originalname : "uploads/profile.png"
-    const isBarberInt = user.is_barber === 'true' ? 1 : 0;
-    const isAdminInt = user.is_admin === 'true' ? 1 : 0;
+    const user = req.body;
+    const fechaCreacion = new Date();
+    const connection = await getConnection();
+    const hashedPassword = await bcrypt.hash("1234", 10); // Hash de la contraseña
+    const urlImage = req.file
+      ? "uploads/" + req.file.originalname
+      : "uploads/profile.png";
+    const isBarberInt = user.is_barber === "true" ? 1 : 0;
+    const isAdminInt = user.is_admin === "true" ? 1 : 0;
 
     const [existingUser] = await connection.query(
       `SELECT * FROM ${table} WHERE email = ?`,
@@ -44,11 +48,14 @@ const addUser = async (req, res) => {
     );
 
     if (existingUser !== undefined) {
-      res.json({ rta: -2, message: "El correo electrónico ya está registrado." });
+      res.json({
+        rta: -2,
+        message: "El correo electrónico ya está registrado.",
+      });
       return;
     }
 
-    const result = await connection.query(
+    const [result] = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, email, password, is_barber, is_admin, fecha_creacion, url_image)
     VALUES
@@ -63,52 +70,52 @@ const addUser = async (req, res) => {
         fechaCreacion,
         urlImage,
       ]
-    )
-    console.log(result)
+    );
+    console.log(result);
     if (result.affectedRows > 0) {
       if (req.file) {
-        saveImage(req.file)
+        saveImage(req.file);
       }
-      res.json({ rta: 1, message: "Usuario agregado exitosamente." })
+      res.json({ rta: 1, message: "Usuario agregado exitosamente." });
     } else {
-      res.json({ rta: -1, message: "Ocurrio un errorr." })
+      res.json({ rta: -1, message: "Ocurrio un errorr." });
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error." + err })
+    res.json({ rta: -1, message: "Ocurrio un error." + err });
   }
-}
+};
 
-const updateStateUser = async (req,res)=>{
-  try{
-    const { isBarber } = req.body
-    const { id } = req.params
-    const connection = await getConnection()
-    const result = await connection.query(
+const updateStateUser = async (req, res) => {
+  try {
+    const { isBarber } = req.body;
+    const { id } = req.params;
+    const connection = await getConnection();
+    const [result] = await connection.query(
       `UPDATE ${table} SET is_barber = ? WHERE id = ?`,
       [isBarber, id]
-    )
+    );
     if (result.affectedRows > 0) {
-      res.json({ rta: 1, message: "Se actualizo correctamente." })
+      res.json({ rta: 1, message: "Se actualizo correctamente." });
     } else {
-      res.json({ rta: -1, message: "Ocurrio un error." })
+      res.json({ rta: -1, message: "Ocurrio un error." });
     }
-  } catch(err){
-    res.json({ rta: -1, message: "Ocurrio un error, catch." + err })
-    res.send(err.message)
-  } 
-}
+  } catch (err) {
+    res.json({ rta: -1, message: "Ocurrio un error, catch." + err });
+    res.send(err.message);
+  }
+};
 
 const updateUser = async (req, res) => {
   try {
-    const { id } = req.params
-    let url_image = ""
+    const { id } = req.params;
+    let url_image = "";
     if (req.file) {
-      url_image = "uploads/imageBarbers/" + req.file.originalname
+      url_image = "uploads/imageBarbers/" + req.file.originalname;
     } else {
       url_image = req.body.imageProfile;
     }
-    const { firstName, lastName, email, is_admin } = req.body
-    const isAdminInt = is_admin === 'true' ? 1 : 0;
+    const { firstName, lastName, email, is_admin } = req.body;
+    const isAdminInt = is_admin === "true" ? 1 : 0;
     if (
       id === undefined ||
       firstName === undefined ||
@@ -118,7 +125,7 @@ const updateUser = async (req, res) => {
       res.json({
         rta: -1,
         message: "Ocurrio un problema, por favor complete todos los campos",
-      })
+      });
     }
     const user = {
       firstName,
@@ -126,92 +133,100 @@ const updateUser = async (req, res) => {
       email,
       is_admin: isAdminInt,
       ...(req.file && { url_image }),
-    }
-    const connection = await getConnection()
-    const result = await connection.query(
+    };
+    const connection = await getConnection();
+    const [result] = await connection.query(
       `UPDATE ${table}  SET ? where id= ?`,
       [user, id]
-    )
-    console.log("result", result)
+    );
+    console.log("result", result);
     if (result.affectedRows > 0) {
       if (req.file) {
         saveImage(req.file);
       }
-      res.json({ rta: 1, message: "Se actualizo correctamente." })
+      res.json({ rta: 1, message: "Se actualizo correctamente." });
     } else {
-      res.json({ rta: -1, message: "Ocurrio un error." })
+      res.json({ rta: -1, message: "Ocurrio un error." });
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error, catch." + err })
-    res.send(err.message)
+    res.json({ rta: -1, message: "Ocurrio un error, catch." + err });
+    res.send(err.message);
   }
-}
+};
 
 const deleteUser = async (req, res) => {
   try {
-    const { id } = req.params
-    const connection = await getConnection()
-    const result = await connection.query(
+    const { id } = req.params;
+    const connection = await getConnection();
+    const [result] = await connection.query(
       `delete from ${table}  where id = ?`,
       id
-    )
-    console.log("result", result)
+    );
+    console.log("result", result);
     if (result.affectedRows > 0) {
       res.json({
         rta: 1,
         message: "Usuario eliminado correctamente.",
-      })
+      });
     } else {
       res.json({
         rta: -1,
         message: "Ocurrio un error.",
-      })
+      });
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error." })
-    res.send(err.message)
+    res.json({ rta: -1, message: "Ocurrio un error." });
+    res.send(err.message);
   }
-}
+};
 
 function saveImage(file) {
-  const newPath = `./uploads/${file.originalname}`
-  fs.renameSync(file.path, newPath)
-  return newPath
+  const newPath = `./uploads/${file.originalname}`;
+  fs.renameSync(file.path, newPath);
+  return newPath;
 }
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body
-    const connection = await getConnection()
-    const result = await connection.query(`select * from ${table} where email='${email}'`)
+    const { email, password } = req.body;
+    const connection = await getConnection();
+    // const result = await connection.query(`select * from ${table} where email='${email}'`)
+    const [result] = await connection.query(
+      `SELECT * FROM ${table} WHERE email = ?`,
+      [email]
+    );
+
     if (result.length > 0) {
       const hashedPasswordFromDB = result[0].password;
-      const isPasswordCorrect = await bcrypt.compare(password, hashedPasswordFromDB);
+      const isPasswordCorrect = await bcrypt.compare(
+        password,
+        hashedPasswordFromDB
+      );
       if (isPasswordCorrect) {
-        const { firstName } = result[0]
+        const { firstName } = result[0];
         const token = jwt.sign({ firstName }, "Stack", {
-          expiresIn: "1d"
-        })
-        res.json({ rta: 1, message: result[0], token })
+          expiresIn: "1d",
+        });
+        res.json({ rta: 1, message: result[0], token });
       } else {
         res.json({ rta: -1, message: "Usuario y/o contraseña incorrecta." });
       }
     } else {
-      res.json({ rta: -1, message: "Usuario y/o contraseña incorrectaa." })
+      res.json({ rta: -1, message: "Usuario y/o contraseña incorrectaa." });
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error." + err })
+    res.json({ rta: -1, message: "Ocurrio un error." + err });
   }
-}
+};
 
 const getDataGraphicsUser = async (req, res) => {
   try {
-    const { id,formattedStartDate,formattedEndDate } = req.body;
+    const { id, formattedStartDate, formattedEndDate } = req.body;
 
     const barberId = id !== 0 ? id : null;
 
     const connection = await getConnection();
-    
+
     let query = `
       SELECT 
         T.service_id, 
@@ -225,7 +240,7 @@ const getDataGraphicsUser = async (req, res) => {
         T.service_id = S.id 
       WHERE 
         1=1`; // Incluir `1=1` para simplificar la lógica de concatenación
-    
+
     // Si id no es 'all', agregar el filtro para barber_id
     if (barberId !== null) {
       query += ` AND t.barber_id = ?`;
@@ -237,10 +252,11 @@ const getDataGraphicsUser = async (req, res) => {
         T.service_id, 
         S.name_service
     `;
-    
-    const result = await connection.query(query, 
-      barberId !== null 
-        ? [barberId, formattedStartDate, formattedEndDate] 
+
+    const [result] = await connection.query(
+      query,
+      barberId !== null
+        ? [barberId, formattedStartDate, formattedEndDate]
         : [formattedStartDate, formattedEndDate]
     );
     res.json(result);
@@ -248,8 +264,6 @@ const getDataGraphicsUser = async (req, res) => {
     res.status(500).send(err.message);
   }
 };
-
-
 
 const getDataTurnsGraphics = async (req, res) => {
   try {
@@ -275,7 +289,7 @@ const getDataTurnsGraphics = async (req, res) => {
         t.fecha_reserva BETWEEN ? AND ?`;
 
     const queryParams = [formattedStartDate, formattedEndDate];
-    
+
     if (id !== 0) {
       query += ` AND t.barber_id = ?`;
       queryParams.push(id);
@@ -294,13 +308,12 @@ const getDataTurnsGraphics = async (req, res) => {
         MONTH(t.fecha_reserva);
     `;
 
-    const result = await connection.query(query, queryParams);
+    const [result] = await connection.query(query, queryParams);
     res.json(result);
   } catch (err) {
     res.status(500).send(err.message);
   }
 };
-
 
 const getTurnsDayWeek = async (req, res) => {
   try {
@@ -346,7 +359,7 @@ const getTurnsDayWeek = async (req, res) => {
     `;
 
     // Ejecutar la consulta con parámetros
-    const result = await connection.query(query, queryParams);
+    const [result] = await connection.query(query, queryParams);
     console.log("result", result); // Verificar el resultado completo
 
     res.json(result);
@@ -354,12 +367,6 @@ const getTurnsDayWeek = async (req, res) => {
     res.status(500).send(err.message);
   }
 };
-
-
-
-
-
-
 
 export const usersController = {
   getUsers,
@@ -372,4 +379,4 @@ export const usersController = {
   getDataGraphicsUser,
   getDataTurnsGraphics,
   getTurnsDayWeek,
-}
+};

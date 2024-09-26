@@ -1,6 +1,5 @@
 import morgan from "morgan";
 //Routes
-import language from "./routes/language_routes";
 import users from "./routes/users_routes";
 import clients from "./routes/clients_routes";
 import services from "./routes/services_routes";
@@ -26,7 +25,6 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 //Routes
-app.use("/api/languages", language);
 app.use("/api/users", users);
 app.use("/api/clients", clients);
 app.use("/api/services", services);

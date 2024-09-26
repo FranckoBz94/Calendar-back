@@ -5,7 +5,7 @@ const table = "clientes";
 const getClients = async (req, res) => {
   try {
     const connection = await getConnection();
-    const result = await connection.query("select * from " + table);
+    const [result] = await connection.query("select * from " + table);
     res.json(result);
   } catch (err) {
     res.status(500);
@@ -53,7 +53,7 @@ const addClient = async (req, res) => {
       });
     }
 
-    const result = await connection.query(
+    const [result] = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, telefono, dni, email)
     VALUES
@@ -100,7 +100,7 @@ const updateClient = async (req, res) => {
       dni,
     };
     const connection = await getConnection();
-    const result = await connection.query(
+    const [result] = await connection.query(
       `UPDATE ${table}  SET ? where id= ?`,
       [client, id]
     );
@@ -120,7 +120,7 @@ const deleteClient = async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await getConnection();
-    const result = await connection.query(
+    const [result] = await connection.query(
       `delete from ${table}  where id = ?`,
       id
     );
@@ -146,7 +146,7 @@ const fetchClientData = async (req, res) => {
     const { dni } = req.body;
     console.log("dni", dni);
     const connection = await getConnection();
-    const result = await connection.query(
+    const [result] = await connection.query(
       `select * from ${table} where dni=${dni}`
     );
     console.log(result);
