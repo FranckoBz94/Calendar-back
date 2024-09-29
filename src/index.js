@@ -14,11 +14,9 @@ const io = new Server(server, {
   },
   connectionStateRecovery: {},
 });
-const port = app.get("port");
-// app.get("/", (req, res) => {
-//   res.sendFile(process.cwd() + "/front/src/index.tsx");
-// });
 
+const port = app.get("port");
+console.log(port);
 io.on("connection", (socket) => {
   console.log("a user has connected");
 
