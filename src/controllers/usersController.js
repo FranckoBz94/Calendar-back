@@ -47,7 +47,7 @@ const addUser = async (req, res) => {
       [user.email]
     );
 
-    if (existingUser !== undefined) {
+    if (existingUser.length > 0) {
       res.json({
         rta: -2,
         message: "El correo electrónico ya está registrado.",

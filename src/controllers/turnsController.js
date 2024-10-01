@@ -1,5 +1,6 @@
 import moment from "moment/moment";
 import { getConnection } from "../database/database";
+const nodemailer = require("nodemailer");
 
 const table = "turnos";
 
@@ -43,6 +44,11 @@ const addTurn = async (req, res) => {
       ]
     );
     if (result.affectedRows > 0) {
+      sendEmail(
+        "francoberatz.fb@gmail.com", // Dirección ficticia para pruebas
+        "Reserva de Turno Confirmada", // Asunto del correo
+        "<h1>Gracias por reservar su turno</h1><p>Nos vemos pronto en nuestro local.</p>" // Contenido del correo
+      );
       res.json({ rta: 1, message: "Turno registrado exitosamente." });
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." });
@@ -220,6 +226,31 @@ const turnsDayAvailable = async (req, res) => {
     res.status(500);
     res.json({ rta: -1, message: "Ocurrio un error." + err });
   }
+};
+
+const transporter = nodemailer.createTransport({
+  host: "sandbox.smtp.mailtrap.io",
+  port: 2525,
+  auth: {
+    user: "1118461a165ce9", // Reemplaza con el username de Mailtrap
+    pass: "cd09684e5b783b", // Reemplaza con el password de Mailtrap
+  },
+});
+
+const sendEmail = (to, subject, htmlContent) => {
+  const mailOptions = {
+    from: '"Demo App" <demo@example.com>', // Dirección de remitente (puede ser cualquier dirección)
+    to: to, // Dirección de destinatario (será capturada por Mailtrap)
+    subject: subject, // Asunto del correo
+    html: htmlContent, // Contenido HTML del correo
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log("Error al enviar correo:", error);
+    }
+    console.log("Correo enviado:", info.response);
+  });
 };
 
 export const turnsController = {
