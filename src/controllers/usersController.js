@@ -36,30 +36,58 @@ const addUser = async (req, res) => {
     const fechaCreacion = new Date();
     const connection = await getConnection();
     const hashedPassword = await bcrypt.hash("1234", 10); // Hash de la contraseña
-    const urlImage = req.file
-      ? "uploads/" + req.file.originalname
-      : "uploads/profile.png";
+    const timestamp = Date.now();
+    let urlImage = "";
+
+    if (req.file) {
+      const maxLength = 50;
+      const originalName = req.file.originalname;
+
+      // Sanitizar el nombre del archivo, reemplazando caracteres especiales con guiones bajos
+      const sanitizedOriginalName = originalName.replace(/[^a-zA-Z0-9.]/g, "_");
+
+      // Extraer la extensión del archivo
+      const fileExtension = sanitizedOriginalName.split(".").pop();
+
+      // Acortar el nombre del archivo si es necesario
+      const baseName = sanitizedOriginalName.substring(
+        0,
+        sanitizedOriginalName.lastIndexOf(".")
+      );
+      const shortenedName =
+        baseName.length > maxLength
+          ? baseName.substring(0, maxLength)
+          : baseName;
+
+      // Generar el nombre final del archivo que se guardará
+      urlImage = `uploads/${timestamp}_${shortenedName}.${fileExtension}`;
+    } else {
+      urlImage = "uploads/profile.png"; // Imagen predeterminada si no se sube una imagen
+    }
+
     const isBarberInt = user.is_barber === "true" ? 1 : 0;
     const isAdminInt = user.is_admin === "true" ? 1 : 0;
 
+    // Verificar si el correo electrónico ya existe en la base de datos
     const [existingUser] = await connection.query(
       `SELECT * FROM ${table} WHERE email = ?`,
       [user.email]
     );
 
     if (existingUser.length > 0) {
-      res.json({
+      return res.json({
         rta: -2,
         message: "El correo electrónico ya está registrado.",
       });
-      return;
     }
 
+    // Insertar nuevo usuario en la base de datos
     const [result] = await connection.query(
       `INSERT INTO ${table}
     (firstName, lastName, email, password, is_barber, is_admin, fecha_creacion, url_image)
     VALUES
     (?, ?, ?, ?, ?, ?, ?, ?)`,
+
       [
         user.firstName,
         user.lastName,
@@ -71,17 +99,17 @@ const addUser = async (req, res) => {
         urlImage,
       ]
     );
-    console.log(result);
+
     if (result.affectedRows > 0) {
       if (req.file) {
-        saveImage(req.file);
+        saveImage(urlImage, req.file);
       }
       res.json({ rta: 1, message: "Usuario agregado exitosamente." });
     } else {
-      res.json({ rta: -1, message: "Ocurrio un errorr." });
+      res.json({ rta: -1, message: "Ocurrió un error." });
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error." + err });
+    res.json({ rta: -1, message: "Ocurrió un error: " + err });
   }
 };
 
@@ -108,12 +136,31 @@ const updateStateUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const timestamp = Date.now();
     let url_image = "";
     if (req.file) {
-      url_image = "uploads/imageBarbers/" + req.file.originalname;
+      const maxLength = 50;
+      const originalName = req.file.originalname;
+      // Sanitizar el nombre del archivo
+      const sanitizedOriginalName = originalName.replace(/[^a-zA-Z0-9.]/g, "_");
+      // Extraer la extensión del archivo
+      const fileExtension = sanitizedOriginalName.split(".").pop();
+      // Acortar el nombre del archivo si es necesario
+      const baseName = sanitizedOriginalName.substring(
+        0,
+        sanitizedOriginalName.lastIndexOf(".")
+      );
+      const shortenedName =
+        baseName.length > maxLength
+          ? baseName.substring(0, maxLength)
+          : baseName;
+
+      // Generar el nombre final del archivo que se guardará
+      url_image = `uploads/${timestamp}_${shortenedName}.${fileExtension}`;
     } else {
       url_image = req.body.imageProfile;
     }
+    console.log("update image", url_image);
     const { firstName, lastName, email, is_admin } = req.body;
     const isAdminInt = is_admin === "true" ? 1 : 0;
     if (
@@ -142,7 +189,7 @@ const updateUser = async (req, res) => {
     console.log("result", result);
     if (result.affectedRows > 0) {
       if (req.file) {
-        saveImage(req.file);
+        saveImage(url_image, req.file);
       }
       res.json({ rta: 1, message: "Se actualizo correctamente." });
     } else {
@@ -180,8 +227,8 @@ const deleteUser = async (req, res) => {
   }
 };
 
-function saveImage(file) {
-  const newPath = `./uploads/${file.originalname}`;
+function saveImage(filePath, file) {
+  const newPath = `./${filePath}`;
   fs.renameSync(file.path, newPath);
   return newPath;
 }
