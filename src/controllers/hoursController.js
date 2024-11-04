@@ -13,6 +13,19 @@ const getHours = async (req, res) => {
   }
 };
 
+const getDays = async (req, res) => {
+  try {
+    const connection = await getConnection();
+    const [result] = await connection.query(
+      "select * from days_calendar ORDER BY order_day"
+    );
+    res.json(result);
+  } catch (err) {
+    res.status(500);
+    res.send(err.message);
+  }
+};
+
 const updateHours = async (req, res) => {
   console.log(req.params);
   console.log(req.body);
@@ -30,8 +43,6 @@ const updateHours = async (req, res) => {
         message: "Ocurrio un problema, por favor complete todos los campos",
       });
     }
-    // openingTime = new Date(`1970-01-01T${openingTime}`)
-    // closingTime = new Date(`1970-01-01T${closingTime}`)
     const hours = {
       min_hour_calendar,
       max_hour_calendar,
@@ -54,7 +65,28 @@ const updateHours = async (req, res) => {
   }
 };
 
+const updateDays = async (req, res) => {
+  console.log("req.body", req.body);
+  const days = req.body;
+  console.log("entra days", days);
+  try {
+    const connection = await getConnection();
+    for (const day of days) {
+      const dayOpen = day.is_open ? 1 : 0;
+      await connection.query(
+        `UPDATE days_calendar SET is_open = ? WHERE id = ?`,
+        [dayOpen, day.id]
+      );
+    }
+    res.json({ rta: 1, message: "Días actualizados correctamente." });
+  } catch (err) {
+    res.json({ rta: -1, message: "Error al actualizar los días." });
+  }
+};
+
 export const hoursController = {
   getHours,
+  getDays,
   updateHours,
+  updateDays,
 };

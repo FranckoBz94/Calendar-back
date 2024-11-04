@@ -11,5 +11,6 @@ router.post("/availableHoursOnSave", turnsController.availableHoursOnSave);
 router.post("/availableDate", turnsController.availableDate);
 router.post("/searchTurnsProfits", turnsController.searchTurnsProfits);
 router.post("/turnsDayAvailable", turnsController.turnsDayAvailable);
+router.post("/sendEmailForClient", turnsController.sendEmailForClient);
 
 export default router;

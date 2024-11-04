@@ -1,5 +1,6 @@
 import moment from "moment/moment";
 import { getConnection } from "../database/database";
+
 const nodemailer = require("nodemailer");
 
 const table = "turnos";
@@ -44,11 +45,6 @@ const addTurn = async (req, res) => {
       ]
     );
     if (result.affectedRows > 0) {
-      sendEmail(
-        "francoberatz.fb@gmail.com", // Dirección ficticia para pruebas
-        "Reserva de Turno Confirmada", // Asunto del correo
-        "<h1>Gracias por reservar su turno</h1><p>Nos vemos pronto en nuestro local.</p>" // Contenido del correo
-      );
       res.json({ rta: 1, message: "Turno registrado exitosamente." });
     } else {
       res.json({ rta: -1, message: "Ocurrio un error." });
@@ -229,28 +225,63 @@ const turnsDayAvailable = async (req, res) => {
 };
 
 const transporter = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 2525,
+  host: "smtp.ethereal.email",
+  port: 587,
   auth: {
-    user: "1118461a165ce9", // Reemplaza con el username de Mailtrap
-    pass: "cd09684e5b783b", // Reemplaza con el password de Mailtrap
+    user: process.env.ETHEREAL_USER,
+    pass: process.env.ETHEREAL_PASS,
   },
 });
 
-const sendEmail = (to, subject, htmlContent) => {
-  const mailOptions = {
-    from: '"Demo App" <demo@example.com>', // Dirección de remitente (puede ser cualquier dirección)
-    to: to, // Dirección de destinatario (será capturada por Mailtrap)
-    subject: subject, // Asunto del correo
-    html: htmlContent, // Contenido HTML del correo
-  };
+const sendEmailForClient = async (req, res) => {
+  console.log("req", req);
+  try {
+    const { dataComplete, dataFormClient, dataBarber, selectedService } =
+      req.body;
+    const formattedDate = moment(dataComplete.start_date).format(
+      "DD/MM/YYYY HH:mm"
+    );
+    console.log("req.body", req.body);
+    const mailOptions = {
+      from: process.env.ETHEREAL_USER,
+      to: dataFormClient.email,
+      subject: "Confirmación de Turno",
+      html: `
+      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <h2 style="color: #000;">Confirmación de Turno</h2>
+        <p>Hola nombre,</p>
+        <p>¡Gracias por reservar un turno con nosotros! Aquí tienes los detalles de tu cita:</p>
+        <ul style="list-style-type: none; padding: 0;">
+          <li><strong>Barbero seleccionado:</strong> ${dataBarber.firstName} ${dataBarber.lastName}</li>
+          <li><strong>Fecha y hora:</strong> ${formattedDate}</li>
+          <li><strong>Servicio seleccionado:</strong> ${selectedService.name_service}</li>
+          <li><strong>Valor del servicio:</strong> ${dataComplete.price}</li>
+        </ul>
+        <p>Si necesitas cambiar o cancelar tu turno, no dudes en ponerte en contacto con nosotros.</p>
+        <p><strong>Recuerda:</strong> Es importante llegar al menos 10 minutos antes de la hora programada.</p>
+        <p>¡Te esperamos!</p>
+        <p>Saludos cordiales</p>
+      </div>
+    `,
+    };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return console.log("Error al enviar correo:", error);
-    }
-    console.log("Correo enviado:", info.response);
-  });
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error al enviar el correo:", error);
+        return res.status(500).json({
+          rta: -1,
+          message: "Error al enviar el correo: " + error.message,
+        });
+      }
+      return res.status(200).json({
+        rta: 1,
+        message: "Correo de confirmación enviado.",
+      });
+    });
+  } catch (err) {
+    res.status(500);
+    res.json({ rta: -1, message: "Ocurrio un error." + err });
+  }
 };
 
 export const turnsController = {
@@ -263,4 +294,5 @@ export const turnsController = {
   searchTurnsProfits,
   availableHoursOnSave,
   turnsDayAvailable,
+  sendEmailForClient,
 };

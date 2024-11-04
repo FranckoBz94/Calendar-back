@@ -4,6 +4,17 @@ const bcrypt = require("bcrypt");
 const fs = require("node:fs");
 const table = "usuarios_sistema";
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.ethereal.email",
+  port: 587,
+  auth: {
+    user: process.env.ETHEREAL_USER,
+    pass: process.env.ETHEREAL_PASS,
+  },
+});
 
 const getUsers = async (req, res) => {
   try {
@@ -415,6 +426,95 @@ const getTurnsDayWeek = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const connection = await getConnection();
+    const [existingUser] = await connection.query(
+      `SELECT * FROM ${table} WHERE email = ?`,
+      [email]
+    );
+    console.log("existe", existingUser);
+    if (existingUser.length > 0) {
+      const resetToken = crypto.randomBytes(20).toString("hex");
+      const resetPasswordExpire = new Date(Date.now() + 3600000); // 1 hora en milisegundos
+      await connection.query(
+        `UPDATE ${table} SET resetPasswordToken = ?, resetPasswordExpire = ? WHERE email = ?`,
+        [resetToken, resetPasswordExpire, email]
+      );
+      // URL para restablecer la contraseña (ajusta según tu aplicación)
+      const resetUrl = `${process.env.URL_FRONT}/reset-password?token=${resetToken}`;
+
+      const mailOptions = {
+        from: process.env.ETHEREAL_USER,
+        to: email,
+        subject: "Restablece tu contraseña",
+        html: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+          <h2 style="color: #4CAF50;">Solicitud de restablecimiento de contraseña</h2>
+          <p>Hola,</p>
+          <p>Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para continuar con el proceso:</p>
+          <a target="_blank" rel="noopener noreferrer" href="${resetUrl}" 
+            style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            Restablecer Contraseña
+          </a>
+          <p>Si no solicitaste este cambio, puedes ignorar este correo.</p>
+          <p>Gracias,</p>
+          <p><strong>Equipo de soporte de Tu Empresa</strong></p>
+          <hr />
+          <small style="color: #999;">Este enlace es válido por 1 hora.</small>
+        </div>`,
+      };
+
+      // Enviar el correo
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error al enviar el correo:", error);
+          return res.status(500).json({
+            success: false,
+            message: "Error al enviar el correo: " + error.message,
+          });
+        }
+        return res.status(200).json({
+          success: true,
+          message: "Correo de restablecimiento enviado.",
+        });
+      });
+    } else {
+      return res
+        .status(404)
+        .json({ success: false, message: "Usuario no encontrado." });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error en el servidor." });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  console.log("req.bod", req.body);
+  const { token, password } = req.body;
+  const connection = await getConnection();
+
+  const [user] = await connection.query(
+    `SELECT * FROM ${table} WHERE resetPasswordToken = ? AND resetPasswordExpire > ?`,
+    [token, Date.now()]
+  );
+  if (!user || user.length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Token inválido o expirado." });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await connection.query(
+    `UPDATE ${table} SET password = ?, resetPasswordToken = NULL, resetPasswordExpire = NULL WHERE id = ?`,
+    [hashedPassword, user[0].id]
+  );
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Contraseña actualizada correctamente." });
+};
+
 export const usersController = {
   getUsers,
   addUser,
@@ -426,4 +526,6 @@ export const usersController = {
   getDataGraphicsUser,
   getDataTurnsGraphics,
   getTurnsDayWeek,
+  forgotPassword,
+  resetPassword,
 };

@@ -22,7 +22,8 @@ const addClient = async (req, res) => {
       `SELECT * FROM ${table} WHERE dni = ?`,
       [client.dni]
     );
-    if (rows !== undefined) {
+    console.log("rows", rows);
+    if (rows.length > 0) {
       return res.json({
         rta: -2,
         message: "Ya existe un cliente con este DNI.",
@@ -34,7 +35,7 @@ const addClient = async (req, res) => {
       [client.email]
     );
     console.log("rowsByEmail", rowsByEmail);
-    if (rowsByEmail !== undefined) {
+    if (rowsByEmail.length > 0) {
       return res.json({
         rta: -2,
         message: "Ya existe un cliente con este email.",
@@ -46,7 +47,7 @@ const addClient = async (req, res) => {
       [client.telefono]
     );
     console.log("rowsByTelefono", rowsByTelefono);
-    if (rowsByTelefono !== undefined) {
+    if (rowsByTelefono.length > 0) {
       return res.json({
         rta: -2,
         message: "Ya existe un cliente con ese telefono.",
