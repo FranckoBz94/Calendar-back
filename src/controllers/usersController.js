@@ -71,9 +71,9 @@ const addUser = async (req, res) => {
           : baseName;
 
       // Generar el nombre final del archivo que se guardará
-      urlImage = `uploads/${timestamp}_${shortenedName}.${fileExtension}`;
+      urlImage = `tmp/uploads/${timestamp}_${shortenedName}.${fileExtension}`;
     } else {
-      urlImage = "uploads/profile.png"; // Imagen predeterminada si no se sube una imagen
+      urlImage = "tmp/uploads/profile.png"; // Imagen predeterminada si no se sube una imagen
     }
 
     const isBarberInt = user.is_barber === "true" ? 1 : 0;
@@ -167,7 +167,7 @@ const updateUser = async (req, res) => {
           : baseName;
 
       // Generar el nombre final del archivo que se guardará
-      url_image = `uploads/${timestamp}_${shortenedName}.${fileExtension}`;
+      url_image = `tmp/uploads/${timestamp}_${shortenedName}.${fileExtension}`;
     } else {
       url_image = req.body.imageProfile;
     }
