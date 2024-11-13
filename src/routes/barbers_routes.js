@@ -3,7 +3,7 @@ import { barbersController } from "../controllers/barbersController";
 const router = Router();
 
 const multer = require("multer");
-var upload = multer({ dest: "tmp/uploads/imageBarbers/" });
+var upload = multer({ dest: "uploads/imageBarbers/" });
 
 router.get("/", barbersController.getBarbers);
 router.post("/", upload.single("imageProfile"), barbersController.addBarber);

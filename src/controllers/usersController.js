@@ -6,6 +6,7 @@ const table = "usuarios_sistema";
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const moment = require("moment-timezone");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.ethereal.email",
@@ -71,9 +72,9 @@ const addUser = async (req, res) => {
           : baseName;
 
       // Generar el nombre final del archivo que se guardará
-      urlImage = `tmp/uploads/${timestamp}_${shortenedName}.${fileExtension}`;
+      urlImage = `uploads/${timestamp}_${shortenedName}.${fileExtension}`;
     } else {
-      urlImage = "tmp/uploads/profile.png"; // Imagen predeterminada si no se sube una imagen
+      urlImage = "uploads/profile.png"; // Imagen predeterminada si no se sube una imagen
     }
 
     const isBarberInt = user.is_barber === "true" ? 1 : 0;
@@ -167,7 +168,7 @@ const updateUser = async (req, res) => {
           : baseName;
 
       // Generar el nombre final del archivo que se guardará
-      url_image = `tmp/uploads/${timestamp}_${shortenedName}.${fileExtension}`;
+      url_image = `uploads/${timestamp}_${shortenedName}.${fileExtension}`;
     } else {
       url_image = req.body.imageProfile;
     }
@@ -493,14 +494,17 @@ const resetPassword = async (req, res) => {
   console.log("req.bod", req.body);
   const { token, password } = req.body;
   const connection = await getConnection();
-
+  const now = new Date();
+  const localDateInBuenosAires = moment(now)
+    .tz("America/Argentina/Buenos_Aires")
+    .format("YYYY-MM-DD HH:mm:ss");
   const [user] = await connection.query(
     `SELECT * FROM ${table} WHERE resetPasswordToken = ? AND resetPasswordExpire > ?`,
-    [token, Date.now()]
+    [token, localDateInBuenosAires]
   );
   if (!user || user.length === 0) {
     return res
-      .status(400)
+      .status(200)
       .json({ success: false, message: "Token inválido o expirado." });
   }
 

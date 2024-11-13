@@ -14,11 +14,8 @@ const cors = require("cors");
 const app = express();
 
 //Settings
-app.use("/tmp/uploads", express.static("/tmp/uploads"));
-app.use(
-  "/tmp/uploads/imageBarbers",
-  express.static("tmp/uploads/imageBarbers")
-);
+app.use("/uploads", express.static("/uploads"));
+app.use("/uploads/imageBarbers", express.static("/uploads/imageBarbers"));
 
 app.use(cors());
 

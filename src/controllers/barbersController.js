@@ -45,9 +45,9 @@ const addBarber = async (req, res) => {
           : baseName;
 
       // Generar el nombre final del archivo que se guardará
-      urlImage = `tmp/uploads/imageBarbers/${timestamp}_${shortenedName}.${fileExtension}`;
+      urlImage = `uploads/imageBarbers/${timestamp}_${shortenedName}.${fileExtension}`;
     } else {
-      urlImage = "tmp/uploads/imageBarbers/profile.png";
+      urlImage = "uploads/imageBarbers/profile.png";
     }
     console.log("url", urlImage);
     const isActiveInt = barber.is_active === "true" ? 1 : 0;
@@ -115,7 +115,7 @@ const updateBarber = async (req, res) => {
           : baseName;
 
       // Generar el nombre final del archivo que se guardará
-      imagen = `tmp/uploads/imageBarbers/${timestamp}_${shortenedName}.${fileExtension}`;
+      imagen = `uploads/imageBarbers/${timestamp}_${shortenedName}.${fileExtension}`;
     } else {
       imagen = req.body.imageProfile;
     }

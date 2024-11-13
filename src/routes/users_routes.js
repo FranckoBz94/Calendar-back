@@ -5,7 +5,7 @@ const router = Router();
 
 //multer para subir imagenes
 const multer = require("multer");
-var upload = multer({ dest: "tmp/uploads/" });
+var upload = multer({ dest: "uploads/" });
 
 router.post("/login", usersController.login);
 router.get("/", usersController.getUsers);
