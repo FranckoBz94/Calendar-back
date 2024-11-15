@@ -8,6 +8,7 @@
     "dev": "nodemon --exec npm run babel-node src/index.js",
     "start": "node src/index.js"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
