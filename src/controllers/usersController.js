@@ -1,12 +1,13 @@
-import { getConnection } from "../database/database";
+import { getConnection } from "../database/database.js";
 
-const bcrypt = require("bcrypt");
-const fs = require("node:fs");
+import bcrypt from "bcrypt";
+import fs from "node:fs";
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
+import moment from "moment-timezone";
+
 const table = "usuarios_sistema";
-const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
-const crypto = require("crypto");
-const moment = require("moment-timezone");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.ethereal.email",

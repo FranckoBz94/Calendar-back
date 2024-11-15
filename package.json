@@ -4,15 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "babel-node": "babel-node src/index.js",
-    "dev": "nodemon --exec babel-node src/index.js",
-    "build": "babel src --out-dir dist",
-    "start": "babel-node src/index.js"
+    "babel-node": "babel-node --presets=@babel/preset-env",
+    "dev": "nodemon --exec npm run babel-node src/index.js",
+    "start": "node src/index.js"
   },
   "type": "module",
-  "engines": {
-    "node": "20.11.1"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",

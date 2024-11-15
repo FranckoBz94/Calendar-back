@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { barbersController } from "../controllers/barbersController";
+import { barbersController } from "../controllers/barbersController.js";
+import multer from "multer";
 const router = Router();
 
-const multer = require("multer");
 var upload = multer({ dest: "uploads/imageBarbers/" });
 
 router.get("/", barbersController.getBarbers);

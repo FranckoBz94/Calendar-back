@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { usersController } from "../controllers/usersController";
-
+import { usersController } from "../controllers/usersController.js";
+import multer from "multer";
 const router = Router();
 
 //multer para subir imagenes
-const multer = require("multer");
 var upload = multer({ dest: "uploads/" });
 
 router.post("/login", usersController.login);

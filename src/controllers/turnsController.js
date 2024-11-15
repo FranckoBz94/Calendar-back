@@ -1,7 +1,6 @@
-import moment from "moment/moment";
-import { getConnection } from "../database/database";
-
-const nodemailer = require("nodemailer");
+import { getConnection } from "../database/database.js";
+import moment from "moment";
+import nodemailer from "nodemailer";
 
 const table = "turnos";
 

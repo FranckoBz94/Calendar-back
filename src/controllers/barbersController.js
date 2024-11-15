@@ -1,5 +1,6 @@
-import { getConnection } from "../database/database";
-const fs = require("node:fs");
+import { getConnection } from "../database/database.js";
+import fs from "node:fs";
+
 const table = "barberos";
 
 const getBarbers = async (req, res) => {

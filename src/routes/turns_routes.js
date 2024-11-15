@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { turnsController } from "../controllers/turnsController";
+import { turnsController } from "../controllers/turnsController.js";
 const router = Router();
 
 router.get("/:id", turnsController.getTurns);
