@@ -1,11 +1,11 @@
 import morgan from "morgan";
 //Routes
-import users from "./routes/users_routes";
-import clients from "./routes/clients_routes";
-import services from "./routes/services_routes";
-import barbers from "./routes/barbers_routes";
-import turns from "./routes/turns_routes";
-import hours from "./routes/hours_routes";
+import users from "./routes/users_routes.js";
+import clients from "./routes/clients_routes.js";
+import services from "./routes/services_routes.js";
+import barbers from "./routes/barbers_routes.js";
+import turns from "./routes/turns_routes.js";
+import hours from "./routes/hours_routes.js";
 import { config } from "dotenv";
 config();
 
