@@ -1,9 +1,10 @@
 import app from "./app.js";
+// const app = require("./app.js");
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { config } from "dotenv";
 config();
-
+console.log("ap".app);
 const server = createServer(app);
 
 const io = new Server(server, {
