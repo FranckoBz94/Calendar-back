@@ -34,9 +34,16 @@ io.on("connection", (socket) => {
 });
 
 const main = () => {
-  server.listen(port, "0.0.0.0", () => {
-    console.log(`Server corriendo en puerto ${port}`);
-  });
+  try {
+    server.listen(port, () => {
+      console.log(`Server corriendo en puerto ${port}`);
+    });
+  } catch (error) {
+    console.error("Error starting the server:", error);
+  }
+  // server.listen(port, "0.0.0.0", () => {
+  //   console.log(`Server corriendo en puerto ${port}`);
+  // });
 };
 
 main();
