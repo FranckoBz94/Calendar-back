@@ -4,8 +4,16 @@ import multer from "multer";
 const router = Router();
 
 //multer para subir imagenes
-var upload = multer({ dest: "uploads/" });
-
+// var upload = multer({ dest: "uploads/" });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "/tmp"); // Usar directorio temporal en Vercel
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage: storage });
 router.post("/login", usersController.login);
 router.get("/", usersController.getUsers);
 router.post("/dataGraphics", usersController.getDataGraphicsUser);
