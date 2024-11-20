@@ -12,9 +12,9 @@ import cors from "cors";
 config();
 
 const app = express();
-app.use("/", (req, res) => {
-  res.send("Server is running");
-});
+// app.use("/", (req, res) => {
+//   res.send("Server is running");
+// });
 //Settings
 app.use("/uploads", express.static("/uploads"));
 app.use("/uploads/imageBarbers", express.static("/uploads/imageBarbers"));
