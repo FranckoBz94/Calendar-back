@@ -17,19 +17,6 @@ const io = new Server(server, {
 });
 
 // Configuración de CORS para otras rutas si es necesario
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", [
-//     "https://calendarfront-alpha.vercel.app",
-//     "http://localhost:3000",
-//   ]);
-//   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept"
-//   );
-//   next();
-// });
-
 app.use((req, res, next) => {
   const allowedOrigins = [
     "https://calendarfront-alpha.vercel.app",
@@ -44,11 +31,12 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
+  res.header("Access-Control-Allow-Credentials", "true");
   next();
 });
 
-const port = app.get("port");
-console.log(port);
+const port = process.env.PORT || app.get("port");
+console.log(`Server corriendo en puerto ${port}`);
 
 io.on("connection", (socket) => {
   console.log("a user has connected");
@@ -59,6 +47,7 @@ io.on("connection", (socket) => {
 
   socket.on("turn", async (barberId) => {
     try {
+      console.log(`Mensaje recibido: ${barberId}`);
       io.emit("turn", barberId);
     } catch (error) {
       console.error("Error fetching updated turns:", error);
