@@ -8,8 +8,8 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://calendarfront-alpha.vercel.app", // Especifica el origen permitido
-    methods: ["GET", "POST", "PUT", "DELETE"], // Los métodos permitidos
+    origin: ["https://calendarfront-alpha.vercel.app", "http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
     allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
   },
@@ -18,10 +18,10 @@ const io = new Server(server, {
 
 // Configuración de CORS para otras rutas si es necesario
 app.use((req, res, next) => {
-  res.header(
-    "Access-Control-Allow-Origin",
-    "https://calendarfront-alpha.vercel.app"
-  );
+  res.header("Access-Control-Allow-Origin", [
+    "https://calendarfront-alpha.vercel.app",
+    "http://localhost:3000",
+  ]);
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   res.header(
     "Access-Control-Allow-Headers",
