@@ -74,9 +74,6 @@ const main = () => {
   } catch (error) {
     console.error("Error starting the server:", error);
   }
-  // server.listen(port, "0.0.0.0", () => {
-  //   console.log(`Server corriendo en puerto ${port}`);
-  // });
 };
 
 main();
