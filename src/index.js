@@ -17,11 +17,28 @@ const io = new Server(server, {
 });
 
 // Configuración de CORS para otras rutas si es necesario
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", [
+//     "https://calendarfront-alpha.vercel.app",
+//     "http://localhost:3000",
+//   ]);
+//   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
+
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", [
+  const allowedOrigins = [
     "https://calendarfront-alpha.vercel.app",
     "http://localhost:3000",
-  ]);
+  ];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   res.header(
     "Access-Control-Allow-Headers",
