@@ -6,7 +6,7 @@ const router = Router();
 // var upload = multer({ dest: "uploads/imageBarbers/" });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "/tmp"); // Usar directorio temporal en Vercel
+    cb(null, "/"); // Usar directorio temporal en Vercel
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);

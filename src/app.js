@@ -12,14 +12,53 @@ import cors from "cors";
 config();
 
 const app = express();
-// app.use("/", (req, res) => {
-//   res.send("Server is running");
-// });
-//Settings
-app.use("/uploads", express.static("/uploads"));
-app.use("/uploads/imageBarbers", express.static("/uploads/imageBarbers"));
 
-app.use(cors());
+app.use(
+  "/uploads",
+  express.static("uploads", {
+    setHeaders: (res, path, stat) => {
+      console.log(`Serving file: ${path}`);
+    },
+  })
+);
+app.use(
+  "/uploads/imageBarbers",
+  express.static("uploads/imageBarbers", {
+    setHeaders: (res, path, stat) => {
+      console.log(`Serving file: ${path}`);
+    },
+  })
+);
+// app.use("/uploads/imageBarbers", express.static("/uploads/imageBarbers"));
+
+// Configuración de CORS
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept"],
+    credentials: true,
+  })
+);
+
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+// Ajuste para manejar solicitudes OPTIONS
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.set("port", process.env.PORT);
 
