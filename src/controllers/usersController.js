@@ -24,7 +24,7 @@ const getUsers = async (req, res) => {
     const [result] = await connection.query("select * from " + table);
     res.json(result);
   } catch (err) {
-    res.status(500);
+    res.status(500 + "error aca");
     res.send(err.message);
   }
 };

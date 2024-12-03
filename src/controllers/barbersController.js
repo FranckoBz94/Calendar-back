@@ -19,19 +19,14 @@ const table = "barberos";
 // };
 
 const getBarbers = async (req, res) => {
-  console.log("vieen aca");
   const connection = await getConnection();
-  console.log("vieen aca", connection);
   try {
-    console.log("connection", connection);
-    console.log("Attempting to fetch barbers...");
     const [result] = await connection.query(
       "SELECT b.*, u.firstName as nameBarber, u.lastName as lastNameBarber, u.email as emailUser " +
         "FROM " +
         table +
         " as b LEFT JOIN usuarios_sistema as u ON b.id_user = u.id"
     );
-    // console.log("Query successful, returning results...", result);
     res.json(result);
   } catch (err) {
     console.error("Error in query:", err);
