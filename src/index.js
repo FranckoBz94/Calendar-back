@@ -18,7 +18,7 @@ io.on("connection", (socket) => {
   console.log("a user has connected");
 
   socket.on("disconnect", () => {
-    console.log("a user has disconnected");
+    console.log("a user has disconnectedd");
   });
 
   socket.on("turn", async (barberId) => {
