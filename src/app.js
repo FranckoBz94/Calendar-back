@@ -32,7 +32,10 @@ app.use(
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://calendar-back-flax.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://calendar-back-production-c26d.up.railway.app",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Origin",
@@ -47,7 +50,10 @@ app.use(
 app.options(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://calendar-back-flax.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://calendar-back-production-c26d.up.railway.app",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Origin",
