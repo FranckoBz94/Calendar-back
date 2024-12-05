@@ -35,6 +35,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://calendar-back-production-c26d.up.railway.app",
+      "https://calendarfront-alpha.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
@@ -53,6 +54,7 @@ app.options(
     origin: [
       "http://localhost:3000",
       "https://calendar-back-production-c26d.up.railway.app",
+      "https://calendarfront-alpha.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
