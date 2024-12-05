@@ -61,7 +61,9 @@ app.options(
 );
 
 app.set("port", process.env.PORT);
-
+app.get("/", (req, res) => {
+  res.send("Servidor funcionando correctamente");
+});
 //Middlewares (funciones intermedias entre una peticion y una respuesta)
 app.use(morgan("dev"));
 app.use(express.json());
