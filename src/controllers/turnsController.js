@@ -71,8 +71,15 @@ const updateTurn = async (req, res) => {
         message: "Ocurrio un problema, por favor complete todos los campos",
       });
     }
+    // Transformar `dateBooking` al formato 'YYYY-MM-DD'
+    const date = new Date(dateBooking);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const formattedDateBooking = `${year}-${month}-${day}`;
+
     const turn = {
-      fecha_reserva: dateBooking,
+      fecha_reserva: formattedDateBooking,
       start_date: new Date(start),
       end_date: new Date(end),
       cliente_id: idClient,
@@ -90,7 +97,7 @@ const updateTurn = async (req, res) => {
       res.json({ rta: -1, message: "OOcurrio un error." });
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Odddcurrio un error." });
+    res.json({ rta: -1, message: "Odddcurrio un error." + err });
     res.send(err.message);
   }
 };

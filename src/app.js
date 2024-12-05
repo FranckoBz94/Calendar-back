@@ -32,7 +32,7 @@ app.use(
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:28990"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Origin",
@@ -47,7 +47,7 @@ app.use(
 app.options(
   "*",
   cors({
-    origin: ["http://localhost:3000", "http://localhost:28990"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Origin",
