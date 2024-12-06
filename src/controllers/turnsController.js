@@ -134,7 +134,22 @@ const availableNextTurn = async (req, res) => {
     const [result] = await connection.query(
       `SELECT * from ${table} WHERE start_date>"${start_date}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
     );
-    res.json({ rta: 1, message: result });
+    const adjustedResults = result.map((turn) => {
+      turn.start_date = moment
+        .utc(turn.start_date)
+        .tz("America/Argentina/Buenos_Aires")
+        .format("YYYY-MM-DD HH:mm:ss");
+      turn.end_date = moment
+        .utc(turn.end_date)
+        .tz("America/Argentina/Buenos_Aires")
+        .format("YYYY-MM-DD HH:mm:ss");
+      turn.fecha_reserva = moment
+        .utc(turn.fecha_reserva)
+        .tz("America/Argentina/Buenos_Aires")
+        .format("YYYY-MM-DD");
+      return turn;
+    });
+    res.json({ rta: 1, message: adjustedResults });
   } catch (err) {
     res.status(500);
     res.json({ rta: -1, message: "Ocurrio un error." });
