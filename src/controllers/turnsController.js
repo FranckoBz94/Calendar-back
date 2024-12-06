@@ -132,7 +132,7 @@ const availableNextTurn = async (req, res) => {
     const { dateBooking, start_date, idBarber, endTimeCalendar } = req.body;
     const connection = await getConnection();
     const [result] = await connection.query(
-      `SELECT * from ${table} WHERE start_date>"${start_date}" and barber_id=${idBarber} and DATE_FORMAT(start_date, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
+      `SELECT * from ${table} WHERE start_date>"${start_date}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
     );
     const adjustedResults = result.map((turn) => {
       turn.start_date = moment
