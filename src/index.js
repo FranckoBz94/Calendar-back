@@ -7,7 +7,11 @@ const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://calendarfront-alpha.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://calendarfront-alpha.vercel.app",
+      "https://calendar-back-production-c26d.up.railway.app",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Origin, X-Requested-With", "Content-Type", "Accept"],
     credentials: true,
