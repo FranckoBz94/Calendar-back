@@ -26,17 +26,32 @@ const addTurn = async (req, res) => {
     const turn = req.body;
     console.log("turn", turn);
     const fechaCreacion = new Date();
+
+    // Convertir las fechas a UTC antes de guardarlas
+    const startDateUTC = moment
+      .tz(turn.start, "America/Argentina/Buenos_Aires")
+      .utc()
+      .format("YYYY-MM-DD HH:mm:ss");
+    const endDateUTC = moment
+      .tz(turn.end, "America/Argentina/Buenos_Aires")
+      .utc()
+      .format("YYYY-MM-DD HH:mm:ss");
+    const dateBookingUTC = moment
+      .tz(turn.dateBooking, "America/Argentina/Buenos_Aires")
+      .utc()
+      .format("YYYY-MM-DD");
+
     const connection = await getConnection();
     const [result] = await connection.query(
       `INSERT INTO ${table}
-    (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id,price_service)
-    VALUES
-    (?, ?, ?, ?, ?, ?, ?,?)`,
+      (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id, price_service)
+      VALUES
+      (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        turn.dateBooking,
+        dateBookingUTC,
         fechaCreacion,
-        new Date(turn.start),
-        new Date(turn.end),
+        startDateUTC,
+        endDateUTC,
         turn.idClient,
         turn.idBarber,
         turn.idService,
@@ -46,13 +61,46 @@ const addTurn = async (req, res) => {
     if (result.affectedRows > 0) {
       res.json({ rta: 1, message: "Turno registrado exitosamente." });
     } else {
-      res.json({ rta: -1, message: "Ocurrio un error." });
+      res.json({ rta: -1, message: "Ocurrió un error." });
     }
   } catch (err) {
     console.error(err);
-    res.json({ rta: -1, message: "Ocurrio un errorrrr." + err });
+    res.json({ rta: -1, message: "Ocurrió un error: " + err });
   }
 };
+
+// const addTurn = async (req, res) => {
+//   try {
+//     const turn = req.body;
+//     console.log("turn", turn);
+//     const fechaCreacion = new Date();
+//     const connection = await getConnection();
+//     const [result] = await connection.query(
+//       `INSERT INTO ${table}
+//     (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id,price_service)
+//     VALUES
+//     (?, ?, ?, ?, ?, ?, ?,?)`,
+//       [
+//         turn.dateBooking,
+//         fechaCreacion,
+//         new Date(turn.start),
+//         new Date(turn.end),
+//         turn.idClient,
+//         turn.idBarber,
+//         turn.idService,
+//         turn.price,
+//       ]
+//     );
+//     if (result.affectedRows > 0) {
+//       res.json({ rta: 1, message: "Turno registrado exitosamente." });
+//     } else {
+//       res.json({ rta: -1, message: "Ocurrio un error." });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.json({ rta: -1, message: "Ocurrio un errorrrr." + err });
+//   }
+// };
 
 const updateTurn = async (req, res) => {
   try {
@@ -131,6 +179,10 @@ const availableNextTurn = async (req, res) => {
   try {
     const { dateBooking, start_date, idBarber, endTimeCalendar } = req.body;
     const connection = await getConnection();
+    console.log(
+      "sql",
+      `SELECT * from ${table} WHERE start_date>"${start_date}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
+    );
     const [result] = await connection.query(
       `SELECT * from ${table} WHERE start_date>"${start_date}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
     );
