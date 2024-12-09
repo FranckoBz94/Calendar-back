@@ -34,7 +34,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://calendar-back-production-c26d.up.railway.app",
+      "https://calendar-back-production-c69d.up.railway.app",
       "https://calendarfront-alpha.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -53,7 +53,7 @@ app.options(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://calendar-back-production-c26d.up.railway.app",
+      "https://calendar-back-production-c69d.up.railway.app",
       "https://calendarfront-alpha.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
