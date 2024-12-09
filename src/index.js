@@ -39,6 +39,7 @@ const main = () => {
   try {
     const port = process.env.PORT || 4000;
     server.listen(port, () => {
+      console.log(`Zona horaria `, process.env.TZ);
       console.log(`Server corriendo en puerto ${port}`);
     });
   } catch (error) {
