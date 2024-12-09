@@ -6,7 +6,20 @@ const getHours = async (req, res) => {
   try {
     const connection = await getConnection();
     const [result] = await connection.query("select * from " + table);
-    res.json(result);
+    const adjustedResults = result.map((hour) => ({
+      id: hour.id,
+      min_hour_calendar: moment
+        .utc(hour.min_hour_calendar, "HH:mm:ss")
+        .tz("America/Argentina/Buenos_Aires")
+        .format("HH:mm:ss"),
+      max_hour_calendar: moment
+        .utc(hour.max_hour_calendar, "HH:mm:ss")
+        .tz("America/Argentina/Buenos_Aires")
+        .format("HH:mm:ss"),
+    }));
+
+    res.json(adjustedResults);
+    // res.json(result);
   } catch (err) {
     res.status(500);
     res.send(err.message);
@@ -33,6 +46,12 @@ const updateHours = async (req, res) => {
     const id = parseInt(req.params.id); // Convierte req.params.id a un entero
 
     const { min_hour_calendar, max_hour_calendar } = req.body;
+    const minHourUTC = moment(min_hour_calendar, "HH:mm:ss")
+      .utc()
+      .format("HH:mm:ss");
+    const maxHourUTC = moment(max_hour_calendar, "HH:mm:ss")
+      .utc()
+      .format("HH:mm:ss");
     if (
       id === undefined ||
       min_hour_calendar === undefined ||
@@ -44,8 +63,8 @@ const updateHours = async (req, res) => {
       });
     }
     const hours = {
-      min_hour_calendar,
-      max_hour_calendar,
+      minHourUTC,
+      maxHourUTC,
     };
     console.log("RTAAA", `UPDATE ${table}  SET ? where id= ?`, [hours, id]);
     const connection = await getConnection();
