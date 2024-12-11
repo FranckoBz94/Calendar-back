@@ -7,20 +7,21 @@ const getHours = async (req, res) => {
   try {
     const connection = await getConnection();
     const [result] = await connection.query("select * from " + table);
-    const adjustedResults = result.map((hour) => ({
-      id: hour.id,
-      min_hour_calendar: moment
-        .utc(hour.min_hour_calendar, "HH:mm:ss")
-        .tz("America/Argentina/Buenos_Aires")
-        .format("HH:mm:ss"),
-      max_hour_calendar: moment
-        .utc(hour.max_hour_calendar, "HH:mm:ss")
-        .tz("America/Argentina/Buenos_Aires")
-        .format("HH:mm:ss"),
-    }));
+    // const adjustedResults = result.map((hour) => ({
+    //   id: hour.id,
+    //   min_hour_calendar: moment
+    //     .utc(hour.min_hour_calendar, "HH:mm:ss")
+    //     .tz("America/Argentina/Buenos_Aires")
+    //     .format("HH:mm:ss"),
+    //   max_hour_calendar: moment
+    //     .utc(hour.max_hour_calendar, "HH:mm:ss")
+    //     .tz("America/Argentina/Buenos_Aires")
+    //     .format("HH:mm:ss"),
+    // }));
 
-    res.json(adjustedResults);
-    // res.json(result);
+    // res.json(adjustedResults);
+    console.log("resulttt", result);
+    res.json(result);
   } catch (err) {
     res.status(500);
     res.send(err.message);
