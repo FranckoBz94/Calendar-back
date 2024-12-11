@@ -44,15 +44,15 @@ const updateHours = async (req, res) => {
   console.log(req.params);
   console.log(req.body);
   try {
-    const id = parseInt(req.params.id); // Convierte req.params.id a un entero
+    const id = parseInt(req.params.id);
 
     const { min_hour_calendar, max_hour_calendar } = req.body;
-    const minHourUTC = moment(min_hour_calendar, "HH:mm:ss")
-      .utc()
-      .format("HH:mm:ss");
-    const maxHourUTC = moment(max_hour_calendar, "HH:mm:ss")
-      .utc()
-      .format("HH:mm:ss");
+    // const minHourUTC = moment(min_hour_calendar, "HH:mm:ss")
+    //   .utc()
+    //   .format("HH:mm:ss");
+    // const maxHourUTC = moment(max_hour_calendar, "HH:mm:ss")
+    //   .utc()
+    //   .format("HH:mm:ss");
     if (
       id === undefined ||
       min_hour_calendar === undefined ||
@@ -64,8 +64,8 @@ const updateHours = async (req, res) => {
       });
     }
     const hours = {
-      minHourUTC,
-      maxHourUTC,
+      min_hour_calendar,
+      max_hour_calendar,
     };
     console.log("RTAAA", `UPDATE ${table}  SET ? where id= ?`, [hours, id]);
     const connection = await getConnection();

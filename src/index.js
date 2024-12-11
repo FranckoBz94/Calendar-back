@@ -10,7 +10,6 @@ const io = new Server(server, {
     origin: [
       "http://localhost:3000",
       "https://calendarfront-alpha.vercel.app",
-      "https://calendar-back-production-c26d.up.railway.app",
       "https://calendar-back-production-cf69.up.railway.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
