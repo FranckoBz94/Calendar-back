@@ -185,10 +185,15 @@ const availableNextTurn = async (req, res) => {
     const connection = await getConnection();
     console.log(
       "sql",
-      `SELECT * from ${table} WHERE start_date>"${start_date_send}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
+      `SELECT * FROM ${table} WHERE start_date > ? AND start_date < ? AND barber_id = ? AND DATE_FORMAT(fecha_reserva, '%Y-%m-%d') = ? ORDER BY start_date ASC LIMIT 1`,
+      [start_date_send, endTimeCalendar, idBarber, dateBooking]
     );
+    // const [result] = await connection.query(
+    //   `SELECT * from ${table} WHERE start_date>"${start_date_send}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
+    // );
     const [result] = await connection.query(
-      `SELECT * from ${table} WHERE start_date>"${start_date_send}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
+      `SELECT * FROM ${table} WHERE start_date > ? AND start_date < ? AND barber_id = ? AND DATE_FORMAT(fecha_reserva, '%Y-%m-%d') = ? ORDER BY start_date ASC LIMIT 1`,
+      [start_date_send, endTimeCalendar, idBarber, dateBooking]
     );
     const adjustedResults = result.map((turn) => {
       turn.start_date = moment
