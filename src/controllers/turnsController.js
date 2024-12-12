@@ -266,6 +266,40 @@ const turnsDayAvailable = async (req, res) => {
     console.log(start_date);
     console.log(minutes_services);
     const connection = await getConnection();
+    console.log(
+      "sql",
+      `WITH RECURSIVE available_slots AS (
+        SELECT
+            TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) AS slot_start,
+            TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) + INTERVAL ${minutes_services} MINUTE AS slot_end,
+            h.max_hour_calendar
+        FROM
+            hours_calendar h
+        WHERE
+            id = 1
+
+        UNION ALL
+
+        SELECT
+            slot_start + INTERVAL 30 MINUTE,
+            slot_start + INTERVAL 30 MINUTE + INTERVAL ${minutes_services} MINUTE,
+            max_hour_calendar
+        FROM
+            available_slots
+        WHERE
+            slot_start + INTERVAL 30 MINUTE + INTERVAL ${minutes_services} MINUTE <= TIMESTAMP(CONCAT('${start_date}', ' ', max_hour_calendar))
+    )
+
+    SELECT slot_start, slot_end
+    FROM available_slots
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM turnos AS T
+        WHERE T.barber_id = ${idBarber}
+        AND (T.start_date < slot_end AND T.end_date > slot_start)
+    )
+    ORDER BY slot_start;`
+    );
     const [result] = await connection.query(
       `WITH RECURSIVE available_slots AS (
         SELECT
