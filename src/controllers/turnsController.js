@@ -270,8 +270,8 @@ const turnsDayAvailable = async (req, res) => {
       "sql",
       `WITH RECURSIVE available_slots AS (
         SELECT
-            TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) AS slot_start,
-            TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) + INTERVAL ${minutes_services} MINUTE AS slot_end,
+            DATE_FORMAT(TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)),'%Y-%m-%d %H:%i:%s') AS slot_start,
+            DATE_FORMAT(TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) + INTERVAL ${minutes_services} MINUTE, '%Y-%m-%d %H:%i:%s') AS slot_end,
             h.max_hour_calendar
         FROM
             hours_calendar h
@@ -281,8 +281,8 @@ const turnsDayAvailable = async (req, res) => {
         UNION ALL
 
         SELECT
-            slot_start + INTERVAL 30 MINUTE,
-            slot_start + INTERVAL 30 MINUTE + INTERVAL ${minutes_services} MINUTE,
+            DATE_FORMAT(slot_start + INTERVAL 30 MINUTE, '%Y-%m-%d %H:%i:%s'),
+            DATE_FORMAT(slot_start + INTERVAL 30 MINUTE + INTERVAL ${minutes_services} MINUTE, '%Y-%m-%d %H:%i:%s'),
             max_hour_calendar
         FROM
             available_slots
@@ -300,11 +300,12 @@ const turnsDayAvailable = async (req, res) => {
     )
     ORDER BY slot_start;`
     );
+
     const [result] = await connection.query(
       `WITH RECURSIVE available_slots AS (
         SELECT
-            TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) AS slot_start,
-            TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) + INTERVAL ${minutes_services} MINUTE AS slot_end,
+            DATE_FORMAT(TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)),'%Y-%m-%d %H:%i:%s') AS slot_start,
+            DATE_FORMAT(TIMESTAMP(CONCAT('${start_date}', ' ', h.min_hour_calendar)) + INTERVAL ${minutes_services} MINUTE, '%Y-%m-%d %H:%i:%s') AS slot_end,
             h.max_hour_calendar
         FROM
             hours_calendar h
@@ -314,8 +315,8 @@ const turnsDayAvailable = async (req, res) => {
         UNION ALL
 
         SELECT
-            slot_start + INTERVAL 30 MINUTE,
-            slot_start + INTERVAL 30 MINUTE + INTERVAL ${minutes_services} MINUTE,
+            DATE_FORMAT(slot_start + INTERVAL 30 MINUTE, '%Y-%m-%d %H:%i:%s'),
+            DATE_FORMAT(slot_start + INTERVAL 30 MINUTE + INTERVAL ${minutes_services} MINUTE, '%Y-%m-%d %H:%i:%s'),
             max_hour_calendar
         FROM
             available_slots
