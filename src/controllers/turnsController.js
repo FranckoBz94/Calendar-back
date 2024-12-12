@@ -296,7 +296,10 @@ const turnsDayAvailable = async (req, res) => {
         SELECT 1
         FROM turnos AS T
         WHERE T.barber_id = ${idBarber}
-        AND (T.start_date < slot_end AND T.end_date > slot_start)
+        AND (
+        CONVERT_TZ(T.start_date, '+00:00', 'America/Argentina/Buenos_Aires') < slot_end 
+        AND CONVERT_TZ(T.end_date, '+00:00', 'America/Argentina/Buenos_Aires') > slot_start
+        )
     )
     ORDER BY slot_start;`
     );
@@ -330,7 +333,10 @@ const turnsDayAvailable = async (req, res) => {
         SELECT 1
         FROM turnos AS T
         WHERE T.barber_id = ${idBarber}
-        AND (T.start_date < slot_end AND T.end_date > slot_start)
+        AND (
+        CONVERT_TZ(T.start_date, '+00:00', 'America/Argentina/Buenos_Aires') < slot_end 
+        AND CONVERT_TZ(T.end_date, '+00:00', 'America/Argentina/Buenos_Aires') > slot_start
+        )
     )
     ORDER BY slot_start;`
     );
