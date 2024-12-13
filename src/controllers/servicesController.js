@@ -5,7 +5,9 @@ const table = "servicios";
 const getServices = async (req, res) => {
   try {
     const connection = await getConnection();
-    const [result] = await connection.query("select * from " + table);
+    const [result] = await connection.query(
+      "select * from " + table + " WHERE id != 1"
+    );
     res.json(result);
   } catch (err) {
     res.status(500);
