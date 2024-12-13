@@ -46,7 +46,7 @@ const addTurn = async (req, res) => {
       `INSERT INTO ${table}
       (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id, price_service, note)
       VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         dateBookingUTC,
         fechaCreacion,
