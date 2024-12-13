@@ -9,7 +9,6 @@ const getServices = async (req, res) => {
     res.json(result);
   } catch (err) {
     res.status(500);
-    res.send(err.message);
   }
 };
 
@@ -37,7 +36,6 @@ const addService = async (req, res) => {
     }
   } catch (err) {
     res.json({ rta: -1, message: "Ocurrio un error." });
-    res.send(err.message);
   }
 };
 
@@ -76,7 +74,6 @@ const updateService = async (req, res) => {
     }
   } catch (err) {
     res.json({ rta: -1, message: "Ocurrio un error." });
-    res.send(err.message);
   }
 };
 
@@ -100,8 +97,7 @@ const deleteService = async (req, res) => {
       });
     }
   } catch (err) {
-    res.json({ rta: -1, message: "Ocurrio un error." });
-    res.send(err.message);
+    res.json({ rta: -1, message: "Ocurrio un error." + err });
   }
 };
 
