@@ -224,21 +224,11 @@ const availableHoursOnSave = async (req, res) => {
   try {
     const { start_date, end_date, idBarber } = req.body;
     const connection = await getConnection();
-    const start_date_send = CONVERT_TZ(
-      start_date,
-      "+00:00",
-      "America/Argentina/Buenos_Aires"
-    );
-    const end_date_send = CONVERT_TZ(
-      end_date,
-      "+00:00",
-      "America/Argentina/Buenos_Aires"
-    );
     console.log(
-      `SELECT * from ${table} WHERE (start_date<"${end_date_send}" and end_date>"${start_date_send}") and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
+      `SELECT * from ${table} WHERE (start_date<CONVERT_TZ("${end_date}", '+00:00', 'America/Argentina/Buenos_Aires') and end_date>CONVERT_TZ("${start_date}", '+00:00', 'America/Argentina/Buenos_Aires')) and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
     );
     const [result] = await connection.query(
-      `SELECT * from ${table} WHERE (start_date<"${end_date_send}" and end_date>"${start_date_send}") and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
+      `SELECT * from ${table} WHERE (start_date<CONVERT_TZ("${end_date}", '+00:00', 'America/Argentina/Buenos_Aires') and end_date>CONVERT_TZ("${start_date}", '+00:00', 'America/Argentina/Buenos_Aires')) and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
     );
     res.json({ rta: 1, message: result });
   } catch (err) {
