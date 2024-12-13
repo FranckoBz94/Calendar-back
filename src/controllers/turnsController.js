@@ -44,7 +44,7 @@ const addTurn = async (req, res) => {
     const connection = await getConnection();
     const [result] = await connection.query(
       `INSERT INTO ${table}
-      (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id, price_service)
+      (fecha_reserva, fecha_reserva_creada, start_date, end_date, cliente_id, barber_id, service_id, price_service, note)
       VALUES
       (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -56,6 +56,7 @@ const addTurn = async (req, res) => {
         turn.idBarber,
         turn.idService,
         turn.price,
+        turn.note,
       ]
     );
     if (result.affectedRows > 0) {
@@ -105,7 +106,8 @@ const addTurn = async (req, res) => {
 const updateTurn = async (req, res) => {
   try {
     const { id } = req.params;
-    const { dateBooking, start, end, idClient, idService, idBarber } = req.body;
+    const { dateBooking, start, end, idClient, idService, idBarber, note } =
+      req.body;
     if (
       dateBooking === undefined ||
       start === undefined ||
@@ -133,6 +135,7 @@ const updateTurn = async (req, res) => {
       cliente_id: idClient,
       service_id: idService,
       barber_id: idBarber,
+      note,
     };
     const connection = await getConnection();
     const [result] = await connection.query(
