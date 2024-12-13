@@ -224,14 +224,16 @@ const availableHoursOnSave = async (req, res) => {
   try {
     const { start_date, end_date, idBarber } = req.body;
     const connection = await getConnection();
-    const start_date_send = moment
-      .utc(start_date)
-      .tz("America/Argentina/Buenos_Aires")
-      .format("YYYY-MM-DD HH:mm:ss");
-    const end_date_send = moment
-      .utc(end_date)
-      .tz("America/Argentina/Buenos_Aires")
-      .format("YYYY-MM-DD HH:mm:ss");
+    const start_date_send = CONVERT_TZ(
+      start_date,
+      "+00:00",
+      "America/Argentina/Buenos_Aires"
+    );
+    const end_date_send = CONVERT_TZ(
+      end_date,
+      "+00:00",
+      "America/Argentina/Buenos_Aires"
+    );
     console.log(
       `SELECT * from ${table} WHERE (start_date<"${end_date_send}" and end_date>"${start_date_send}") and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
     );
