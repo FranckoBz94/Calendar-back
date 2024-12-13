@@ -186,14 +186,6 @@ const availableNextTurn = async (req, res) => {
       .tz("America/Argentina/Buenos_Aires")
       .format("YYYY-MM-DD HH:mm:ss");
     const connection = await getConnection();
-    console.log(
-      "sql",
-      `SELECT * FROM ${table} WHERE CONVERT_TZ(start_date, '+00:00', 'America/Argentina/Buenos_Aires') > ? AND CONVERT_TZ(start_date, '+00:00', 'America/Argentina/Buenos_Aires') < ? AND barber_id = ? AND DATE_FORMAT(fecha_reserva, '%Y-%m-%d') = ? ORDER BY start_date ASC LIMIT 1`,
-      [start_date_send, endTimeCalendar, idBarber, dateBooking]
-    );
-    // const [result] = await connection.query(
-    //   `SELECT * from ${table} WHERE start_date>"${start_date_send}" and barber_id=${idBarber} and DATE_FORMAT(fecha_reserva, '%Y-%m-%d')="${dateBooking}" ORDER BY start_date ASC LIMIT 1`
-    // );
     const [result] = await connection.query(
       `SELECT * FROM ${table} WHERE CONVERT_TZ(start_date, '+00:00', 'America/Argentina/Buenos_Aires') > ? AND CONVERT_TZ(start_date, '+00:00', 'America/Argentina/Buenos_Aires') < ? AND barber_id = ? AND DATE_FORMAT(fecha_reserva, '%Y-%m-%d') = ? ORDER BY start_date ASC LIMIT 1`,
       [start_date_send, endTimeCalendar, idBarber, dateBooking]
@@ -224,18 +216,50 @@ const availableHoursOnSave = async (req, res) => {
   try {
     const { start_date, end_date, idBarber } = req.body;
     const connection = await getConnection();
-    console.log(
-      `SELECT * from ${table} WHERE (start_date<CONVERT_TZ("${end_date}", '+00:00', 'America/Argentina/Buenos_Aires') and end_date>CONVERT_TZ("${start_date}", '+00:00', 'America/Argentina/Buenos_Aires')) and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
-    );
-    const [result] = await connection.query(
-      `SELECT * from ${table} WHERE (start_date<CONVERT_TZ("${end_date}", '+00:00', 'America/Argentina/Buenos_Aires') and end_date>CONVERT_TZ("${start_date}", '+00:00', 'America/Argentina/Buenos_Aires')) and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
-    );
+
+    // Realiza la conversión de zona horaria en la consulta SQL
+    const query = `
+      SELECT * FROM ${table} 
+      WHERE (
+        CONVERT_TZ(start_date, '+00:00', 'America/Argentina/Buenos_Aires') < ?
+        AND CONVERT_TZ(end_date, '+00:00', 'America/Argentina/Buenos_Aires') > ?
+      ) 
+      AND barber_id = ?
+      ORDER BY start_date ASC
+      LIMIT 1;
+    `;
+
+    console.log(query); // Opcional: para verificar la consulta generada
+
+    const [result] = await connection.query(query, [
+      end_date,
+      start_date,
+      idBarber,
+    ]);
     res.json({ rta: 1, message: result });
   } catch (err) {
-    res.status(500);
-    res.json({ rta: -1, message: "Ocurrio un error." });
+    res
+      .status(500)
+      .json({ rta: -1, message: "Ocurrió un error.", error: err.message });
   }
 };
+
+// const availableHoursOnSave = async (req, res) => {
+//   try {
+//     const { start_date, end_date, idBarber } = req.body;
+//     const connection = await getConnection();
+//     console.log(
+//       `SELECT * from ${table} WHERE (start_date<CONVERT_TZ("${end_date}", '+00:00', 'America/Argentina/Buenos_Aires') and end_date>CONVERT_TZ("${start_date}", '+00:00', 'America/Argentina/Buenos_Aires')) and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
+//     );
+//     const [result] = await connection.query(
+//       `SELECT * from ${table} WHERE (start_date<CONVERT_TZ("${end_date}", '+00:00', 'America/Argentina/Buenos_Aires') and end_date>CONVERT_TZ("${start_date}", '+00:00', 'America/Argentina/Buenos_Aires')) and barber_id=${idBarber}  ORDER BY start_date ASC LIMIT 1`
+//     );
+//     res.json({ rta: 1, message: result });
+//   } catch (err) {
+//     res.status(500);
+//     res.json({ rta: -1, message: "Ocurrio un error." });
+//   }
+// };
 
 const availableDate = async (req, res) => {
   try {
