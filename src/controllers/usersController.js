@@ -133,6 +133,10 @@ const updateStateUser = async (req, res) => {
     console.log("id llega", id);
     console.log("isBarber", isBarber);
     const connection = await getConnection();
+    console.log(`UPDATE ${table} SET is_barber = ? WHERE id = ?`, [
+      isBarber,
+      id,
+    ]);
     const [result] = await connection.query(
       `UPDATE ${table} SET is_barber = ? WHERE id = ?`,
       [isBarber, id]
