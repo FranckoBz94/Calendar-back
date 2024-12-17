@@ -309,7 +309,7 @@ const getDataGraphicsUser = async (req, res) => {
 
     // Si id no es 'all', agregar el filtro para barber_id
     if (barberId !== null) {
-      query += ` AND t.barber_id = ?`;
+      query += ` AND T.barber_id = ?`;
     }
     query += ` AND T.fecha_reserva BETWEEN ? AND ?`;
 
